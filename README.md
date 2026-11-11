@@ -26,6 +26,20 @@ It is one HTML file plus four bundled libraries. There is no server and nothing 
 
 The keyword match is a coverage measure of the posting's terms. It is a writing guide, not a prediction of how any employer's system ranks applicants.
 
+## How facts are approved
+
+Extraction is done by the AI, so its output is not trusted by default. A new fact is switched on automatically only when the app itself can match it to material you uploaded (resume, LinkedIn text, interview answers, other sources): every number in the fact must appear there, and at least three quarters of its meaningful words must too. Anything else stays off, marked as waiting, until you tick it yourself. Unapproved facts are never sent to the writer.
+
+## Resume standard
+
+Every version is written and checked against one standard, set out with its sources in [docs/RESUME-STANDARD.md](docs/RESUME-STANDARD.md). In short:
+
+- **Parses cleanly:** one column, standard headings, plain characters, contact details in the body, dates in one plain format, DOCX or text PDF.
+- **Can be found:** the posting's exact job title and skill phrases where your facts support them, abbreviations given with their long form, no term stuffed.
+- **Reads like a person wrote it:** no em or en dashes, no filler or machine-sounding words, varied bullet openings and lengths, no first person, something specific in each bullet.
+
+The checks only flag. Text is never rewritten silently: you edit the line, or approve a Revise that sends the failed checks to the writer.
+
 ## How repair works
 
 When a step fails, the app does not just show an error. A repair panel appears with the likely cause and one or more fixes. Nothing is changed until you pick one.
@@ -112,6 +126,8 @@ In both modes the page cannot fetch job links, so postings are pasted as text.
 ```
 index.html        the whole app: styles, logic, prompts
 lib/              bundled third-party libraries (see below)
+docs/             the resume standard and its sources
+HANDOFF.md        current state and next steps, updated at the end of each build cycle
 tests/            jsdom scripts with a simulated Claude runtime, database and AI providers
 ```
 
@@ -122,7 +138,7 @@ npm install
 npm test
 ```
 
-The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), and the repair system (`tests/heal.js`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
+The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), and fact approval plus the resume standard (`tests/standards.js`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
 
 ## Bundled libraries
 

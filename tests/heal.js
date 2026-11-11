@@ -13,9 +13,11 @@ const tap=require('./tap');
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 const prompt=b=>(b.messages&&b.messages[0].content)||'';
 (async()=>{
- // 1. trailing comma: fixed silently, no panel, no extra request
+ // 1. trailing comma: no silent tidy. The panel asks, and tidying happens only on approval
  let t=await ready(mk(async()=>reply(JSON.stringify(GOOD).replace(/}$/,',}'))));t.type('#srcText',src);t.click('[data-act=addSource]');await wait(200);
- ok(t.R.S.facts.length===1&&!t.d.querySelector('.incident')&&t.calls.length===1,'small formatting slip is repaired locally with no extra request');t.w.close();
+ ok(t.R.S.facts.length===0&&!!t.d.querySelector('.incident [data-id=tidy]'),'a punctuation slip is not tidied silently; the panel offers it as a fix');
+ tap(t.w,t.d.querySelector('.incident [data-id=tidy]'));await wait(300);
+ ok(t.R.S.facts.length===1&&t.R.S.ui.tidyOnce===false&&!t.d.querySelector('.incident'),'approved tidy applies once and the step completes');t.w.close();
  // 2. unreadable answer: panel, permission, AI repair, retry succeeds
  t=await ready(mk(async b=>prompt(b).startsWith('The text below was meant')?reply(JSON.stringify(GOOD)):reply('{"profile":{"name":"Sample Person" "roles":[oops')));t.type('#srcText',src);t.click('[data-act=addSource]');await wait(200);
  ok(!!t.d.querySelector('.incident')&&t.R.S.facts.length===0,'unreadable answer opens the repair panel');
@@ -25,7 +27,7 @@ const prompt=b=>(b.messages&&b.messages[0].content)||'';
  t.R.applyFix('jsonRepair');await wait(150);
  ok(t.calls.length===1&&t.R.S.facts.length===0,'GUARDRAIL: calling the fix function directly is refused');
  ok(t.R.reportText().includes('approval gate'),'GUARDRAIL: refused attempts are logged');
- ok(t.d.querySelector('.incident [data-id=jsonRepair]').className.includes('primary'),'the first proposed fix matches the failure');
+ ok(!!t.d.querySelector('.incident [data-id=jsonRepair]')&&t.d.querySelector('.incident [data-id=tidy]').className.includes('primary'),'the proposed fixes match the failure');
  tap(t.w,t.d.querySelector('.incident [data-id=jsonRepair]'));await wait(300);
  ok(t.R.S.ui.repairOnce===false&&t.R.S.facts.length===1&&t.R.S.sources.length===1&&!t.d.querySelector('.incident'),'approved fix is applied and the failed step is retried without duplicating the source');
  ok(t.R.S.profile.heals.length===1&&t.R.S.profile.heals[0].fix==='jsonRepair','the approved fix is recorded');t.w.close();
