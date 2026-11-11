@@ -14,7 +14,10 @@ Turn the Jobs tab into the place a search is run from.
 - Next action and follow-up date per job, with an "overdue" view
 - People per job: recruiter, hiring manager, referrer, with notes and last contact
 - Where each job came from (referral, careers page, job board) so sources can be compared
-- Weekly numbers: applications sent, outreach asks sent, responses, interviews
+- Weekly view, in priority order: outreach sent, applications submitted, people contacted, and the source of each lead
+- Responses and interviews per week as secondary numbers
+
+Starts after the first real intake run (resume, LinkedIn, interview) so Phase 1 problems are fixed first.
 
 ## Phase 3: Outreach and documents
 
