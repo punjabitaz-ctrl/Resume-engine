@@ -2,7 +2,7 @@
 
 Resume Engine starts as one job: turn a fact base into a tailored resume. The direction is a system that manages a whole job search. This file is the working plan; phases ship in order and each one has to earn the next.
 
-## Phase 1: Resume engine (shipped, v0.10)
+## Phase 1: Resume engine (shipped, v0.11)
 
 Fact base, intake interview, job analysis, tailored writing with truth checks, templates, versions, learning from edits and results, backup, tester problem reports, bring-your-own AI engine, and repair with user approval.
 
@@ -25,11 +25,18 @@ Starts after the first real intake run (resume, LinkedIn, interview) so Phase 1 
 - Drafted outreach and follow-up messages written from the fact base, in the user's voice
 - Cover letters under the same truth rules as resumes
 
-## Phase 4: Interview preparation
+## Phase 4: Interview preparation (first version shipped early, v0.11)
 
-- Likely questions from the posting, answered with stories built only from facts
-- A story bank reused across interviews, built on the Wins tab's STAR stories (already in place)
-- Debrief notes after each round, fed back into learning
+Built ahead of the tracker because the first tester's concern was accomplishments going uncaptured for interviews.
+
+Shipped: story bank with themes and interview-only stories, rounds by stage, likely questions matched to stories, timed practice with feedback, "tell me about yourself", research notes, debrief, thank-you drafts.
+
+Still to do:
+
+- Debrief notes feeding the learning loop
+- Questions actually asked, collected across interviews into a personal question bank
+- Spoken practice (recording or dictation) where the platform allows it
+- Company research loaded for the user, which needs link fetching (see Platform)
 
 ## Phase 5: Offers and close
 

@@ -16,7 +16,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  const click=sel=>{const el=d.querySelector(sel);if(!el)throw new Error('no '+sel);el.dispatchEvent(new w.MouseEvent('click',{bubbles:true}))};
  const type=(sel,v)=>{const el=d.querySelector(sel);if(!el)throw new Error('no '+sel);el.value=v;el.dispatchEvent(new w.Event('input',{bubbles:true}))};
  w.location.hash='wins';await wait(30);R.render();
- ok(d.querySelectorAll('#tabs a').length===8&&d.querySelector('#tabs a[aria-current]').textContent.includes('Wins'),'Wins has its own tab');
+ ok(d.querySelectorAll('#tabs a').length===9&&d.querySelector('#tabs a[aria-current]').textContent.includes('Wins'),'Wins has its own tab');
  ok(d.body.textContent.includes('1 accomplishment from your sources to build out')&&d.body.textContent.includes('0 of 3'),'one-line accomplishments are offered for building out, and roles show how many wins they still need');
  // build a win from an existing fact
  click('[data-act=newWin][data-id=f1]');

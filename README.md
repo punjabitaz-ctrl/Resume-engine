@@ -10,10 +10,11 @@ It is one HTML file plus four bundled libraries. There is no server and nothing 
 | --- | --- |
 | Sources | Upload PDF, DOCX or text (resume, LinkedIn, portfolio, project notes). Claude splits it into atomic facts. Long documents are read in parts. |
 | Wins | Your accomplishments told in full using STAR (situation, task, action, result): projects, awards, deliverables, recognition. Scored for strength, tracked per role, checked against a posting. |
-| Interview | Asks 7 questions aimed at gaps in the fact base, optionally targeted at one job. Answers become facts. |
+| Intake | Asks 7 questions aimed at gaps in the fact base, optionally targeted at one job. Answers become facts. |
 | Fact base | The only material the writer may use. Edit, switch off, move between roles, merge duplicate roles. |
 | Jobs | Paste a posting. Get a weighted keyword map, an evidence score against your facts, and a status tracker. |
 | Tailor | Writes a version per job. Keyword match, checks, gaps, four templates, DOCX / PDF / TXT export, version history, compare, mark as sent. |
+| Interview prep | Story bank by theme, interview rounds, likely questions matched to your stories, timed practice with feedback, "tell me about yourself", research notes, debrief and thank-you drafts. |
 | Memory | Learned lessons (from your hand edits and results), results table, and your own standing instructions. |
 | Setup | AI engine (your key or local model), backup, restore, delete everything, and a problem report testers can copy and send (no resume content or keys in it). |
 
@@ -34,10 +35,24 @@ Resumes get interviews on accomplishments, and extracted one-liners are usually 
 - **In your own words.** You fill in situation, task, action and result. Because you wrote it, a win is trusted as written and the writer may use it directly.
 - **Strength score.** Each win is scored out of 5 by the app itself: a result, a number in the result, enough detail on what you did, the situation or task, and something named. It says exactly what is missing. It never suggests a number.
 - **Coaching by question only.** "Ask me what is missing" has your AI engine read the draft and ask up to four questions. It is told never to suggest answers, numbers or wording. Your answers are added to the win as you typed them.
-- **Coverage.** Each role shows how many wins it has against a target (3 for your two most recent roles, 1 for older ones), and you can check your wins against a posting to see which of its main terms no win speaks to.
+- **Suggested wording, on request.** The AI can offer a more succinct version of each part. It may not add facts or numbers; the app drops any part that adds a number. You accept parts one at a time with your own tap, and can still edit before saving.
+- **Coverage.** Each role shows how many wins it has against a target of 2 to 3 (3 for your two most recent roles, 2 for older ones), and you can check your wins against a posting to see which of its main terms no win speaks to.
 - **Starting points.** One-line accomplishments from your sources are listed for building out, and ten memory prompts help surface wins you have forgotten.
 
 A win is stored as one complete fact, so the number checks, backups, dash scan and repair all cover it. Building a win from an extracted fact switches that fact off so it is not used twice.
+
+## How interview prep works
+
+The concern that started this: a resume alone does not capture the accomplishments and accolades a candidate needs in the room. Wins fix the capture; Interview prep puts them to use. The approach and its sources are in [docs/INTERVIEW-PREP.md](docs/INTERVIEW-PREP.md).
+
+- **Story bank.** Each win can be tagged with the interview themes it answers (leadership, results, conflict, failure and so on). The bank shows which themes have no story. Stories about setbacks or disagreements can be marked interview-only, which keeps them off every resume.
+- **Rounds.** Log each interview by stage. Each stage says what it is for and how to prepare.
+- **Likely questions.** For a posting and stage, the AI predicts 12 to 14 questions, matches each to stories you already have, and leaves it unmatched when none fits. The app discards any story reference it cannot find. Unmatched questions are your gaps.
+- **Practice.** Answer out loud against a clock, with your story hidden until you ask for it. Optional feedback says which STAR parts were missing. It does not rewrite your answer.
+- **Tell me about yourself.** Write it yourself, or approve a draft built only from your facts in the present, past, future shape. The app checks the draft's numbers against your facts and shows the spoken length.
+- **After each round.** A debrief captures what was asked and what you owe, and feeds a thank-you draft that you read, edit and send yourself.
+
+Every AI output here is a proposal or advice. Drafts are accepted only by your own tap.
 
 ## How facts are approved
 
@@ -151,7 +166,7 @@ npm install
 npm test
 ```
 
-The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), fact approval plus the resume standard (`tests/standards.js`), and the wins builder (`tests/wins.js`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
+The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), fact approval plus the resume standard (`tests/standards.js`), the wins builder (`tests/wins.js`), and interview prep (`tests/prep.js`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
 
 ## Bundled libraries
 

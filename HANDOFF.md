@@ -2,7 +2,7 @@
 
 Updated at the end of each build cycle so work can resume without rereading the whole history.
 
-## State: v0.10.0 (11 Nov 2026)
+## State: v0.11.0 (11 Nov 2026)
 
 Everything below is on `main` and published to the inside-Claude copy.
 
@@ -14,6 +14,9 @@ Everything below is on `main` and published to the inside-Claude copy.
 - Repair system, data health check, problem reports with pre-filled GitHub issue
 - Templates (4), versions with compare and sent-lock, learning as an approved proposal
 - Wins tab: STAR accomplishment stories in the user's own words, strength score, per-role targets, posting coverage, question-only AI coaching. Added after feedback from the first tester.
+
+- Interview prep tab (v0.11): story bank themes, interview-only stories, rounds, likely questions matched to stories, timed practice with feedback, introduction draft, research notes, debrief, thank-you drafts. See docs/INTERVIEW-PREP.md.
+- Wins: AI may suggest tighter wording, accepted part by part with the user's tap; targets are 2 to 3 wins per role.
 
 ## Not yet proven
 
@@ -27,11 +30,12 @@ Everything below is on `main` and published to the inside-Claude copy.
 2. GitHub Pages stays off until that run passes without breakage.
 3. The owner wants live support in chat during the first run, working through issues together.
 
-## Open questions for the owner
+## Decisions from the owner (11 Nov 2026)
 
-- What exactly the first tester said, and whether per-role targets (3, 3, then 1) fit
-- Whether the AI may ever propose tightened wording for a win (today it only asks questions)
-- Whether wins should also become the interview story bank (roadmap phase 4)
+- The first tester's concern: the tool might build only from the main resume and miss accomplishments and accolades needed for interviews. Wins and Interview prep answer that.
+- AI may offer a more succinct or professional variation; the user approves it, so everything is user driven.
+- Ask for 2 to 3 wins per role regardless of role, with emphasis on the most recent.
+- Build the story bank early in the process.
 
 ## Next, in order
 
