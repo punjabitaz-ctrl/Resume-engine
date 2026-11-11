@@ -2,7 +2,7 @@
 
 Resume Engine starts as one job: turn a fact base into a tailored resume. The direction is a system that manages a whole job search. This file is the working plan; phases ship in order and each one has to earn the next.
 
-## Phase 1: Resume engine (shipped, v0.9)
+## Phase 1: Resume engine (shipped, v0.10)
 
 Fact base, intake interview, job analysis, tailored writing with truth checks, templates, versions, learning from edits and results, backup, tester problem reports, bring-your-own AI engine, and repair with user approval.
 
@@ -28,7 +28,7 @@ Starts after the first real intake run (resume, LinkedIn, interview) so Phase 1 
 ## Phase 4: Interview preparation
 
 - Likely questions from the posting, answered with stories built only from facts
-- A story bank reused across interviews
+- A story bank reused across interviews, built on the Wins tab's STAR stories (already in place)
 - Debrief notes after each round, fed back into learning
 
 ## Phase 5: Offers and close

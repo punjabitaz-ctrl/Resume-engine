@@ -55,7 +55,7 @@ const prompt=b=>(b.messages&&b.messages[0].content)||'';
  S.jobs=[{id:'j1',jdText:'x',addedAt:1}];S.resumes=[{id:'v1',jobId:'j1',createdAt:1,label:'v1',resume:{experience:'broken'}},{id:'v2',jobId:'missing',createdAt:2,label:'v2',resume:{}}];
  ok(t.R.checkData().length===5,'health check finds each kind of damage ('+t.R.checkData().map(i=>i.text).join(' | ')+')');
  const before=JSON.stringify(t.R.snapshot());t.w.location.hash='facts';await wait(30);t.R.render();
- ok(t.d.querySelector('.incident h2').textContent==='This screen could not be shown'&&t.d.querySelectorAll('#tabs a').length===7,'a screen that cannot draw shows a recovery card instead of breaking the app');
+ ok(t.d.querySelector('.incident h2').textContent==='This screen could not be shown'&&t.d.querySelectorAll('#tabs a').length===8,'a screen that cannot draw shows a recovery card instead of breaking the app');
  ok(JSON.stringify(t.R.snapshot())===before,'damaged data is not touched before approval');
  t.click('[data-act=repairData]');await wait(100);ok(t.R.checkData().length===5&&t.R.doRepair()===0,'GUARDRAIL: data repair refuses a script-made click and a direct call');
  tap(t.w,t.d.querySelector('[data-act=repairData]'));await wait(100);

@@ -9,6 +9,7 @@ It is one HTML file plus four bundled libraries. There is no server and nothing 
 | Tab | Job |
 | --- | --- |
 | Sources | Upload PDF, DOCX or text (resume, LinkedIn, portfolio, project notes). Claude splits it into atomic facts. Long documents are read in parts. |
+| Wins | Your accomplishments told in full using STAR (situation, task, action, result): projects, awards, deliverables, recognition. Scored for strength, tracked per role, checked against a posting. |
 | Interview | Asks 7 questions aimed at gaps in the fact base, optionally targeted at one job. Answers become facts. |
 | Fact base | The only material the writer may use. Edit, switch off, move between roles, merge duplicate roles. |
 | Jobs | Paste a posting. Get a weighted keyword map, an evidence score against your facts, and a status tracker. |
@@ -25,6 +26,18 @@ It is one HTML file plus four bundled libraries. There is no server and nothing 
 - Learning changes how things are written, never what is claimed.
 
 The keyword match is a coverage measure of the posting's terms. It is a writing guide, not a prediction of how any employer's system ranks applicants.
+
+## How wins work
+
+Resumes get interviews on accomplishments, and extracted one-liners are usually too thin. The Wins tab builds each one out.
+
+- **In your own words.** You fill in situation, task, action and result. Because you wrote it, a win is trusted as written and the writer may use it directly.
+- **Strength score.** Each win is scored out of 5 by the app itself: a result, a number in the result, enough detail on what you did, the situation or task, and something named. It says exactly what is missing. It never suggests a number.
+- **Coaching by question only.** "Ask me what is missing" has your AI engine read the draft and ask up to four questions. It is told never to suggest answers, numbers or wording. Your answers are added to the win as you typed them.
+- **Coverage.** Each role shows how many wins it has against a target (3 for your two most recent roles, 1 for older ones), and you can check your wins against a posting to see which of its main terms no win speaks to.
+- **Starting points.** One-line accomplishments from your sources are listed for building out, and ten memory prompts help surface wins you have forgotten.
+
+A win is stored as one complete fact, so the number checks, backups, dash scan and repair all cover it. Building a win from an extracted fact switches that fact off so it is not used twice.
 
 ## How facts are approved
 
@@ -138,7 +151,7 @@ npm install
 npm test
 ```
 
-The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), and fact approval plus the resume standard (`tests/standards.js`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
+The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), fact approval plus the resume standard (`tests/standards.js`), and the wins builder (`tests/wins.js`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
 
 ## Bundled libraries
 

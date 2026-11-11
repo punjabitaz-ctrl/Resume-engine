@@ -2,7 +2,7 @@
 
 Updated at the end of each build cycle so work can resume without rereading the whole history.
 
-## State: v0.9.2 (11 Nov 2026)
+## State: v0.10.0 (11 Nov 2026)
 
 Everything below is on `main` and published to the inside-Claude copy.
 
@@ -13,6 +13,7 @@ Everything below is on `main` and published to the inside-Claude copy.
 - Resume standard built into the writer and the checks (see docs/RESUME-STANDARD.md)
 - Repair system, data health check, problem reports with pre-filled GitHub issue
 - Templates (4), versions with compare and sent-lock, learning as an approved proposal
+- Wins tab: STAR accomplishment stories in the user's own words, strength score, per-role targets, posting coverage, question-only AI coaching. Added after feedback from the first tester.
 
 ## Not yet proven
 
@@ -25,6 +26,12 @@ Everything below is on `main` and published to the inside-Claude copy.
 1. First real run from his main PC with an Anthropic key: resume, LinkedIn text, 7-question interview, one posting.
 2. GitHub Pages stays off until that run passes without breakage.
 3. The owner wants live support in chat during the first run, working through issues together.
+
+## Open questions for the owner
+
+- What exactly the first tester said, and whether per-role targets (3, 3, then 1) fit
+- Whether the AI may ever propose tightened wording for a win (today it only asks questions)
+- Whether wins should also become the interview story bank (roadmap phase 4)
 
 ## Next, in order
 
