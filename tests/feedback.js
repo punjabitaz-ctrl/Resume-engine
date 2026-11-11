@@ -13,4 +13,7 @@ const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');const wa
  console.log('error logged',R.errs.length,R.errs[0].code,'| toast:',d.querySelector('#toast').textContent.slice(0,90));
  w.location.hash='data';await wait(30);R.render();type('#fbText','Extraction stopped.');click('[data-act=copyReport]');await wait(50);click('[data-act=saveReport]');await wait(50);
  console.log('report has version',clip.includes('Version: '+R.APP_VERSION),'error',clip.includes('rate_limited'),'note',clip.includes('Extraction stopped.'),'no resume content',!clip.includes('SECRET'),'| file',saved[0]&&saved[0].filename);
+ const link=d.querySelector('[data-issue]');link.addEventListener('click',e=>e.preventDefault());link.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));const href=decodeURIComponent(link.href);
+ console.log('issue link',href.startsWith('https://github.com/punjabitaz-ctrl/Resume-engine/issues/new?title=Problem report: Extraction stopped.'),'has report',href.includes('Version: '+R.APP_VERSION),'no resume content',!href.includes('SECRET'));
+ if(!href.includes('issues/new?title=')||href.includes('SECRET'))process.exit(1);
  if(!clip.includes('rate_limited')||clip.includes('SECRET'))process.exit(1);w.close()})().catch(e=>{console.error('FAIL',e);process.exit(1)});

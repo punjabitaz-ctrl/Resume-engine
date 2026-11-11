@@ -30,11 +30,15 @@ The keyword match is a coverage measure of the posting's terms. It is a writing 
 
 When a step fails, the app does not just show an error. A repair panel appears with the likely cause and one or more fixes. Nothing is changed until you pick one.
 
+**A human always approves.** Fixes, data repairs and learned-lesson changes pass through an approval gate in the code that only opens for a genuine tap or click by the user (the browser's trusted-input mark, which scripts cannot forge). The AI's analysis is displayed as a recommendation and nothing more. There is no setting that lets the AI apply anything by itself, and the tests fail if a script-made click or a direct function call gets through.
+
 - **Known failures** are diagnosed without any AI call: unreachable server, rejected key, rate limit, an answer cut short, an answer that cannot be read as data, a request that is too large.
 - **Unknown failures** can be sent to your AI engine for analysis. It sees the failure record, your settings and the data check, and must choose from a fixed list of fixes. Anything outside that list is refused.
-- **Fixes** are a fixed, safe set: retry, wait and retry, read documents in smaller parts, let the AI repair unreadable answers, turn off streaming, send only the most relevant facts, repair saved data, open Setup, or draft a problem report. Each approved fix is logged in Setup and can be reset.
+- **Fixes** are a fixed, safe set: retry, wait and retry, read documents in smaller parts, let the AI repair one unreadable answer, turn off streaming, send only the most relevant facts, repair saved data, open Setup, or draft a problem report. Each approved fix is logged in Setup and can be reset.
 - **Saved data** has its own health check. It finds damage such as unreadable items, facts pointing at deleted roles, or versions for deleted jobs. A repair takes a restore point first and can be undone.
 - **A screen that cannot draw** shows a recovery card with the health check and a backup button instead of a blank page.
+
+A problem report can be copied, downloaded, or opened as a pre-filled public GitHub issue on this repository.
 
 The repair assistant cannot rewrite the app's own code. A defect in the app ends in a drafted problem report for the maintainer.
 
@@ -45,7 +49,7 @@ Two signals are captured as you work, at no cost:
 1. **Hand edits.** The original text of a version is kept, so every line you rewrite is a before/after pair. The most recent pairs go straight into the next writing request.
 2. **Results.** Mark the version you submit as sent, then record the job's status. Interview and Offer count as progress; Rejected and No response do not.
 
-"Update learning" sends both to Claude, which maintains up to 12 weighted lessons (strength 1 to 5). Supported lessons are reinforced, contradicted ones are reduced and dropped. Outcome-based lessons need at least two sent versions pointing the same way and are labelled early signals under five outcomes. You can switch any lesson off or drop it for good.
+"Update learning" sends both to your AI engine, which proposes up to 12 weighted lessons (strength 1 to 5): new ones, stronger or weaker ones, and ones to drop. The proposal is shown for review and applies only when you approve it. Outcome-based lessons need at least two sent versions pointing the same way and are labelled early signals under five outcomes. You can switch any lesson off or drop it for good.
 
 ## Running it
 
