@@ -14,7 +14,7 @@ It runs as a Claude artifact: the page is one HTML file plus four bundled librar
 | Jobs | Paste a posting. Get a weighted keyword map, an evidence score against your facts, and a status tracker. |
 | Tailor | Writes a version per job. Keyword match, checks, gaps, four templates, DOCX / PDF / TXT export, version history, compare, mark as sent. |
 | Memory | Learned lessons (from your hand edits and results), results table, and your own standing instructions. |
-| Data | Backup, restore, delete everything. |
+| Data | Backup, restore, delete everything, and a problem report testers can copy and send (no resume content in it). |
 
 ## Rules the writer cannot break
 
@@ -84,6 +84,12 @@ The scripts drive the real page in jsdom against a simulated Claude, database an
 | `lib/mammoth.browser.min.js` | mammoth 1.6.0 | BSD-2-Clause |
 | `lib/pdf.min.js`, `lib/pdf.worker.min.js` | PDF.js 3.11.174 | Apache-2.0 |
 
-## Not built yet
+## Where this is going
 
-Cover letters, a first-run walkthrough, and a tester feedback route.
+Today it is a resume engine. The plan is a full job-search manager: pipeline tracking, outreach, interview prep and offers. See [ROADMAP.md](ROADMAP.md).
+
+## License
+
+Copyright (C) 2026 Taz Abbas.
+
+Licensed under the GNU Affero General Public License v3.0. See [LICENSE](LICENSE). If you host a modified version for other people, the AGPL requires you to offer them your source. The bundled libraries keep their own licenses, listed above.

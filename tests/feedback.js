@@ -1,0 +1,16 @@
+const {JSDOM}=require('jsdom');const fs=require('fs');const path=require('path');
+const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');const wait=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{const saved=[];let clip='';
+ const dom=new JSDOM(html,{runScripts:'dangerously',url:'https://example.test/',pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};
+  const sample=async()=>({text:'x'});sample.json=async()=>{throw{code:'rate_limited',message:'slow down'}};
+  w.claude={use:async k=>k==='sample'?sample:k==='downloads'?{save:async o=>{saved.push(o);return{status:'saved'}}}:null};
+  Object.defineProperty(w.navigator,'clipboard',{value:{writeText:async t=>{clip=t}}})}});
+ const w=dom.window,d=w.document;await wait(300);const R=w.__re;
+ const click=sel=>d.querySelector(sel).dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
+ const type=(sel,v)=>{const el=d.querySelector(sel);el.value=v;el.dispatchEvent(new w.Event('input',{bubbles:true}))};
+ R.S.facts=[{id:'f1',kind:'skill',text:'SECRET RESUME LINE',roleId:''}];
+ type('#srcText','Some resume text that is long enough to be accepted as a source.');click('[data-act=addSource]');await wait(200);
+ console.log('error logged',R.errs.length,R.errs[0].code,'| toast:',d.querySelector('#toast').textContent.slice(0,90));
+ w.location.hash='data';await wait(30);R.render();type('#fbText','Extraction stopped.');click('[data-act=copyReport]');await wait(50);click('[data-act=saveReport]');await wait(50);
+ console.log('report has version',clip.includes('Version: '+R.APP_VERSION),'error',clip.includes('rate_limited'),'note',clip.includes('Extraction stopped.'),'no resume content',!clip.includes('SECRET'),'| file',saved[0]&&saved[0].filename);
+ if(!clip.includes('rate_limited')||clip.includes('SECRET'))process.exit(1);w.close()})().catch(e=>{console.error('FAIL',e);process.exit(1)});
