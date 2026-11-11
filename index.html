@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resume Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a proofreader's desk. One column on phones, a fact rail beside the sheet on wide screens. Blue pencil marks what the engine wrote; red marks what needs your eye. */
+:root{
+  --bg:#eef1f5; --surface:#ffffff; --ink:#141c27; --muted:#5a6878; --line:#d5dbe3;
+  --accent:#2447c9; --accent-ink:#ffffff; --accent-soft:#e4e9fb;
+  --good:#1a7449; --good-soft:#dff2e8; --warn:#8f5700; --warn-soft:#fbeed3; --bad:#b0261c; --bad-soft:#fbe3e0;
+  --paper:#ffffff; --paper-ink:#111111;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#10151c; --surface:#19202a; --ink:#e8edf3; --muted:#97a4b4; --line:#2c3644;
+    --accent:#8ea6ff; --accent-ink:#0c1330; --accent-soft:#222c4d;
+    --good:#62c996; --good-soft:#173527; --warn:#e3b05a; --warn-soft:#3a2d12; --bad:#f08a80; --bad-soft:#40201d;
+    --paper:#f6f6f3; --paper-ink:#111111;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#10151c; --surface:#19202a; --ink:#e8edf3; --muted:#97a4b4; --line:#2c3644;
+  --accent:#8ea6ff; --accent-ink:#0c1330; --accent-soft:#222c4d;
+  --good:#62c996; --good-soft:#173527; --warn:#e3b05a; --warn-soft:#3a2d12; --bad:#f08a80; --bad-soft:#40201d;
+  --paper:#f6f6f3; --paper-ink:#111111;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-text-size-adjust:100%}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.2}
+h1{font-size:18px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:17px;font-weight:600}
+h3{font-size:14px;font-weight:600}
+p{margin:0}
+a{color:var(--accent)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+header.top{background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding-top:12px;padding-bottom:10px}
+.brand{display:flex;align-items:baseline;gap:8px;margin-right:auto}
+.brand span{color:var(--muted);font-size:12.5px}
+.counts{display:flex;gap:12px;font:12px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.counts b{color:var(--ink);font-weight:500}
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs a{flex:none;padding:11px 12px;font-weight:500;font-size:14px;color:var(--muted);text-decoration:none;border-bottom:2px solid transparent}
+nav.tabs a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+nav.tabs a i{font:11px var(--mono);font-style:normal;margin-right:5px;opacity:.7}
+main{padding:20px 0 96px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.lede{color:var(--muted);max-width:65ch}
+.small{font-size:12.5px;color:var(--muted)}
+.mono{font-family:var(--mono);font-size:12.5px}
+label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;color:var(--muted);min-width:0}
+input[type=text],input[type=url],input[type=file],select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:9px 10px;width:100%;min-width:0}
+textarea{min-height:120px;resize:vertical;line-height:1.45}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font:inherit;font-weight:500;border-radius:7px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 13px;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.quiet{border-color:transparent;color:var(--muted);padding:6px 8px}
+button.danger{color:var(--bad)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:4px;font:12px var(--mono);padding:2px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.hit{background:var(--good-soft);border-color:transparent;color:var(--good)}
+.chip.miss{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+.chip.have{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.chip.acc{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.item{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.item:first-child{border-top:0;padding-top:0}
+.fact{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:start;padding:7px 0;border-top:1px dashed var(--line)}
+.fact.off .ftext{color:var(--muted);text-decoration:line-through}
+.fact input{margin-top:4px;width:16px;height:16px}
+.ftext{outline:0;border-radius:4px;padding:1px 3px;overflow-wrap:anywhere}
+.ftext:focus{background:var(--accent-soft)}
+.sheet.norule h5{border-bottom:0;font-size:1.02em;margin-top:18px}
+.ver.on{border-left:3px solid var(--accent);padding-left:10px}
+.vlabel{font-weight:600;outline:0;border-radius:4px;padding:1px 4px;border-bottom:1px dashed var(--line)}
+.vlabel:focus{background:var(--accent-soft)}
+.diff{font:12.5px/1.5 var(--mono);display:flex;flex-direction:column;gap:2px}
+.diff div{padding:2px 6px;border-radius:4px;overflow-wrap:anywhere}
+.diff .add{background:var(--good-soft);color:var(--good)}
+.diff .del{background:var(--bad-soft);color:var(--bad);text-decoration:line-through}
+.diff .ctx{color:var(--muted);font-weight:500;margin-top:6px}
+.fmeta summary{list-style:none;cursor:pointer;margin-top:4px}.fmeta summary::-webkit-details-marker{display:none}.fmeta .grid2{margin-top:8px}
+.checks b.mono{width:64px}
+.banner button{margin-left:6px;padding:4px 10px}
+.meter{display:flex;align-items:center;gap:12px}
+.meter .num{font:600 30px/1 var(--mono);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar span{display:block;height:100%;background:var(--accent)}
+.good{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.checks{display:flex;flex-direction:column;gap:5px;font-size:13.5px}
+.checks div{display:flex;gap:8px}
+.checks b{font:12px var(--mono);width:44px;flex:none}
+.split{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:900px){.split{grid-template-columns:minmax(0,1fr) 330px;align-items:start}}
+.sheetbox{overflow-x:auto}
+.sheet{background:var(--paper);color:var(--paper-ink);border:1px solid var(--line);border-radius:4px;padding:28px 26px;font:13px/1.42 Arial,Helvetica,sans-serif;min-width:0}
+.sheet h4{font-size:1.5em;margin:0;letter-spacing:.01em}
+.sheet .contact{font-size:.92em;margin-top:3px}
+.sheet h5{font-size:.92em;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid #111;margin:14px 0 6px;padding-bottom:2px}
+.sheet .role{display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 12px;font-weight:700;margin-top:8px}
+.sheet .role span:last-child{font-weight:400}
+.sheet ul{margin:4px 0 0;padding-left:18px}
+.sheet li{margin:2px 0}
+.sheet [contenteditable]{outline:0;border-radius:3px}
+.sheet [contenteditable]:focus{background:#e4e9fb}
+.sheet .flag{background:#fbe3e0;box-shadow:0 0 0 2px #fbe3e0}
+.busy{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--ink);color:var(--bg);padding:12px 16px;display:flex;gap:12px;align-items:center;justify-content:center;font-size:14px}
+.busy button{background:transparent;color:inherit;border-color:currentColor;padding:4px 10px}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor;animation:pulse 1.1s infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+#toast{position:fixed;left:16px;right:16px;bottom:70px;z-index:30;display:flex;justify-content:center;pointer-events:none}
+#toast div{background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;max-width:520px;font-size:14px}
+#toast div.bad{background:var(--bad);color:#fff}
+.banner{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.steps div{border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13px;color:var(--muted)}
+.steps div b{display:block;color:var(--ink);font-weight:600}
+.steps div.done{border-color:var(--good);background:var(--good-soft)}
+.steps i{font:11px var(--mono);font-style:normal;color:var(--accent)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><h1>Resume Engine</h1><span id="storeNote">loading</span></div>
+  <div class="counts" id="counts"></div>
+  <button class="quiet" data-act="sync" id="syncBtn" title="Reload saved data">Sync</button>
+</div></header>
+<nav class="tabs" aria-label="Sections"><div class="wrap" id="tabs"></div></nav>
+<main><div class="wrap" id="view"><div class="card"><p class="lede">Loading your fact base.</p></div></div></main>
+<div id="toast" aria-live="polite"></div>
+<div id="busy" class="busy" hidden><span class="dot"></span><span id="busyText"></span><button data-act="stop">Stop</button></div>
+
+<script>
+"use strict";
+/* ---------- state ---------- */
+const S={profile:{},roles:[],facts:[],memory:[],sources:[],jobs:[],resumes:[],ui:{draft:{},jobId:null,resId:null,q:'',iv:null,imp:null},busy:null,ready:false};
+const TABS=[['sources','Sources'],['interview','Interview'],['facts','Fact base'],['jobs','Jobs'],['tailor','Tailor'],['memory','Memory'],['data','Data']];
+const KINDS=['achievement','responsibility','skill','project','education','certification','award','summary','other'];
+const STATUSES=['Saved','Applied','Interview','Offer','Rejected','No response'];
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const clone=o=>JSON.parse(JSON.stringify(o??null));
+const norm=s=>String(s??'').toLowerCase().replace(/[‐-―\-_/]/g,' ').replace(/[^a-z0-9+#.&% ]/g,' ').replace(/\s+/g,' ').trim();
+const D=k=>S.ui.draft[k]??'';
+function toast(msg,kind){const t=$('#toast');t.innerHTML='<div class="'+(kind||'')+'">'+esc(msg)+'</div>';clearTimeout(toast.t);toast.t=setTimeout(()=>{t.innerHTML=''},kind==='bad'?7000:3200)}
+
+/* ---------- pure logic: dates, keywords, numbers, scoring ---------- */
+function dateKey(s){s=String(s||'').toLowerCase();if(!s)return 0;if(/present|current|now/.test(s))return 999912;const y=(s.match(/(19|20)\d{2}/)||[])[0];if(!y)return 0;const mi=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].findIndex(m=>s.includes(m));const mn=(s.match(/\b(0?[1-9]|1[0-2])[\/.-](?:19|20)\d{2}/)||[])[1];return +y*100+(mi>=0?mi+1:(mn?+mn:0))}
+function sortedRoles(){return S.roles.slice().sort((a,b)=>(dateKey(b.end)||dateKey(b.start))-(dateKey(a.end)||dateKey(a.start))||dateKey(b.start)-dateKey(a.start))}
+function roleDates(r){return [r.start,r.end].filter(Boolean).join(' – ')}
+function hasTerm(text,term){const t=norm(term);if(!t)return false;const hay=' '+norm(text)+' ';const forms=[t];if(t.endsWith('s'))forms.push(t.slice(0,-1));else forms.push(t+'s');return forms.some(f=>hay.includes(' '+f+' ')||hay.includes(' '+f+'.')||hay.includes(' '+f+','))}
+function kwHit(text,kw){return [kw.term].concat(kw.variants||[]).some(t=>hasTerm(text,t))}
+function scoreText(job,text){const kws=(job&&job.analysis&&job.analysis.keywords)||[];let tot=0,got=0;const hit=[],miss=[];for(const k of kws){const w=Math.min(3,Math.max(1,+k.weight||1));tot+=w;if(kwHit(text,k)){got+=w;hit.push(k)}else miss.push(k)}return{pct:tot?Math.round(100*got/tot):0,hit,miss,total:kws.length}}
+function nums(s){return (String(s??'').match(/\d[\d,]*(?:\.\d+)?/g)||[]).map(x=>x.replace(/,/g,'').replace(/\.0+$/,''))}
+function unverifiedNums(text,evidence){const ev=new Set(nums(evidence));return nums(text).filter(n=>!ev.has(n))}
+function factsText(list){return list.map(f=>f.text).join('\n')}
+function usableFacts(){return S.facts.filter(f=>f.ok!==false)}
+function allEvidence(){return factsText(usableFacts())+'\n'+S.roles.map(r=>[r.company,r.title,r.location,r.start,r.end].join(' ')).join('\n')+'\n'+Object.values(S.profile).join(' ')}
+function words(s){return (String(s).trim().match(/\S+/g)||[]).length}
+function contactLine(){const p=S.profile;return [p.location,p.phone,p.email].concat(p.links||[]).filter(Boolean).join(' | ')}
+function resumeText(r){const p=S.profile,L=[];L.push(p.name||'');if(r.headline)L.push(r.headline);L.push(contactLine());if(r.summary){L.push('','SUMMARY',r.summary)}if((r.skills||[]).length){L.push('','SKILLS');for(const g of r.skills)L.push((g.group?g.group+': ':'')+(g.items||[]).join(', '))}if((r.experience||[]).length){L.push('','EXPERIENCE');for(const e of r.experience){L.push('',[e.title,e.company].filter(Boolean).join(', ')+(e.location?' | '+e.location:'')+(e.dates?' | '+e.dates:''));for(const b of e.bullets||[])L.push('• '+b.text)}}if((r.projects||[]).length){L.push('','PROJECTS');for(const x of r.projects)L.push('• '+(x.name?x.name+': ':'')+x.text)}if((r.education||[]).length){L.push('','EDUCATION');for(const x of r.education)L.push(x.text)}if((r.certifications||[]).length){L.push('','CERTIFICATIONS');for(const x of r.certifications)L.push(x.text)}return L.join('\n')}
+function flagsFor(r){const byId=Object.fromEntries(S.facts.map(f=>[f.id,f]));const all=allEvidence();const out=[];const chk=(where,text,ev)=>{const bad=unverifiedNums(text,ev);if(bad.length)out.push({where,text,nums:bad})};if(r.summary)chk('summary',r.summary,all);(r.experience||[]).forEach((e,i)=>{const role=S.roles.find(x=>x.id===e.roleId)||{};(e.bullets||[]).forEach((b,j)=>{const cited=(b.facts||[]).map(id=>byId[id]).filter(Boolean);const ev=factsText(cited)+' '+[role.start,role.end,e.dates].join(' ');if(!cited.length){if(unverifiedNums(b.text,all).length)out.push({where:'e'+i+'b'+j,text:b.text,nums:unverifiedNums(b.text,all)});else if(!(b.facts||[]).length)out.push({where:'e'+i+'b'+j,text:b.text,nums:[],nosrc:true})}else chk('e'+i+'b'+j,b.text,ev)})});(r.projects||[]).forEach((x,i)=>chk('p'+i,x.text,all));return out}
+function atsChecks(r,flags){const p=S.profile,t=resumeText(r),w=words(t);const long=(r.experience||[]).flatMap(e=>e.bullets||[]).filter(b=>words(b.text)>34).length;const noDates=(r.experience||[]).filter(e=>!e.dates).length;const numFlags=flags.filter(f=>f.nums.length).length;return[
+ {ok:!!(p.email&&p.phone),label:'Contact line has email and phone'},
+ {ok:!!(r.summary&&(r.skills||[]).length&&(r.experience||[]).length),label:'Standard sections: Summary, Skills, Experience'},
+ {ok:(r.education||[]).length>0,label:'Education section present'},
+ {ok:w<=1100,label:'Length '+w+' words, about '+Math.max(1,Math.round(w/52)/10)+' pages (target 2 or fewer)'},
+ {ok:long===0,label:long?long+' bullets run past 34 words':'Bullets are scannable length'},
+ {ok:noDates===0,label:noDates?noDates+' roles are missing dates':'Every role has dates'},
+ {ok:numFlags===0,label:numFlags?numFlags+' lines contain numbers not found in your fact base':'Every number traces to your fact base'}]}
+
+/* ---------- storage: artifact database, browser storage as fallback ---------- */
+const DATA_KEYS=['profile','roles','facts','memory','sources','jobs','resumes'];
+const isEmpty=o=>!o.sources.length&&!o.facts.length&&!o.jobs.length&&!o.roles.length;
+const Store={db:null,uid:null,owner:false,mode:'local',pending:{},running:{},inboxed:0,
+ async init(){try{if(window.claude&&claude.use){const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);this.db=db;if(user){this.uid=await user.id();this.owner=!!(await user.isOwner())}}}catch(e){}await this.load()},
+ P(k){return 'data/users/'+this.uid+'/'+k},
+ async readSet(doc,col){const [p,r,f,m,so,jo,re]=await Promise.all([doc('profile').get(),doc('roles').get(),doc('facts').get(),doc('memory').get(),col('sources').limit(300).get(),col('jobs').limit(500).get(),col('resumes').limit(500).get()]);const items=q=>q.docs.map(d=>Object.assign(clone(d.data()),{id:d.id}));return{profile:p.exists?clone(p.data()):{},roles:r.exists?clone(r.data().items)||[]:[],facts:f.exists?clone(f.data().items)||[]:[],memory:m.exists?clone(m.data().items)||[]:[],sources:items(so),jobs:items(jo),resumes:items(re)}},
+ async load(){this.mode='local';
+  if(this.db&&this.uid){try{const db=this.db,lib=db.doc(this.P('lib'));const timeout=new Promise((_,rej)=>setTimeout(()=>rej({code:'timeout'}),10000));
+    const [mine,meta]=await Promise.race([Promise.all([this.readSet(k=>db.doc(this.P(k)),c=>lib.collection(c)),db.doc(this.P('meta')).get()]),timeout]);
+    let ok=meta.exists;if(!ok){try{await db.doc(this.P('meta')).set({v:2,createdAt:Date.now()});ok=true}catch(e){ok=false}}
+    if(ok){this.mode='cloud';Object.assign(S,mine);
+     if(this.owner){
+      if(isEmpty(mine)){try{const old=await this.readSet(k=>db.doc('state/'+k),c=>db.collection(c));if(!isEmpty(old)){Object.assign(S,old);this.saveAll()}}catch(e){}}
+      try{const ib=await db.collection('inbox').limit(50).get();for(const d of ib.docs){const x=clone(d.data());if(x.kind==='job'&&x.jdText){const it={id:uid('j'),url:x.url||'',company:x.company||'',title:x.title||'',jdText:String(x.jdText).slice(0,60000),status:'Saved',addedAt:Date.now()};S.jobs.push(it);this.item('jobs',it);this.inboxed++}else if(x.kind==='source'&&x.text){const it={id:uid('s'),type:x.type||'other',title:x.title||'Loaded by Claude',text:String(x.text).slice(0,150000),addedAt:Date.now(),trusted:false};S.sources.push(it);this.item('sources',it);this.inboxed++}this.write('inbox/'+d.id,()=>null)}}catch(e){}}
+     return}
+   }catch(e){this.mode='local'}}
+  try{const raw=localStorage.getItem('resume-engine');if(raw){const o=JSON.parse(raw);for(const k of DATA_KEYS)if(o[k])S[k]=o[k]}}catch(e){}},
+ write(path,get){if(this.mode!=='cloud')path='local';this.pending[path]=get;if(this.running[path])return;this.running[path]=true;(async()=>{while(this.pending[path]){const g=this.pending[path];delete this.pending[path];try{await this.put(path,g())}catch(e){toast(e&&e.code==='quota_exceeded'?'Storage is full. Delete old sources or versions.':'Could not save. Your change is still on screen; try again.','bad')}}this.running[path]=false})()},
+ async put(path,data){if(this.mode==='cloud'){const ref=this.db.doc(path);if(data===null)await ref.delete();else await ref.set(data)}else{try{localStorage.setItem('resume-engine',JSON.stringify(snapshot()))}catch(e){toast('This browser blocked saving. Download a backup from the Data tab.','bad')}}},
+ state(k){this.write(this.P(k),()=>k==='profile'?clone(S.profile):{items:clone(S[k])})},
+ item(coll,it){this.write(this.P('lib')+'/'+coll+'/'+it.id,()=>{const o=clone(it);delete o.id;return o})},
+ remove(coll,id){this.write(this.P('lib')+'/'+coll+'/'+id,()=>null)},
+ saveAll(){for(const k of ['profile','roles','facts','memory'])this.state(k);for(const c of ['sources','jobs','resumes'])for(const it of S[c])this.item(c,it)},
+ replaceAll(o){for(const c of ['sources','jobs','resumes'])for(const it of S[c])this.remove(c,it.id);S.profile=o.profile||{};for(const k of ['roles','facts','memory','sources','jobs','resumes'])S[k]=Array.isArray(o[k])?o[k]:[];this.saveAll()}
+};
+function snapshot(){const o={};for(const k of DATA_KEYS)o[k]=S[k];return o}
+
+/* ---------- Claude ---------- */
+let sampleP;function getSample(){if(!sampleP)sampleP=(async()=>{try{return window.claude&&claude.use?await claude.use('sample'):null}catch(e){return null}})();return sampleP}
+let ctl=null;
+function errCopy(e){const c=e&&e.code;return({not_granted:'Claude access was not allowed for this page. Reload and allow it to use the writer.',sampling_disabled:'Claude is not available on this account.',rate_limited:'Usage limit reached. Wait a few minutes and try again.',session_expired:'Sign in again, then retry.',refused:'Claude declined that input. Edit the text and retry.',invalid_json:'The answer came back malformed. Try again; if it repeats, use a shorter input.',prompt_too_large:'That text is too long. Trim it and retry.',unavailable:'The writer only runs inside Claude. Open this page from your Claude artifacts.',lib:'A file tool failed to load. Reload the page and retry.'})[c]||('Something went wrong'+(e&&e.message?': '+e.message:'')+'. Try again.')}
+async function askJSON(prompt,tier){const s=await getSample();if(!s)throw{code:'unavailable'};return s.json(prompt,{modelTier:tier||'default',cache:false,signal:ctl.signal,onText:({text})=>{if(S.busy){$('#busyText').textContent=S.busy+' · '+text.length+' characters written'}}})}
+function setBusy(l){S.busy=l;$('#busyText').textContent=l+' \u00b7 thinking'}
+async function run(label,fn){if(S.busy)return;S.busy=label;ctl=new AbortController();$('#busy').hidden=false;$('#busyText').textContent=label+' · thinking';try{await fn()}catch(e){if(!e||e.code!=='cancelled'){console.error(e);toast(errCopy(e),'bad')}}finally{S.busy=null;$('#busy').hidden=true;render()}}
+
+/* ---------- file intake ---------- */
+const libs={};function lib(src){return libs[src]||(libs[src]=new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>{delete libs[src];rej({code:'lib'})};document.head.appendChild(s)}))}
+async function fileToText(file){const n=file.name.toLowerCase();if(n.endsWith('.pdf')){await lib('lib/pdf.min.js');const pj=window.pdfjsLib;pj.GlobalWorkerOptions.workerSrc='lib/pdf.worker.min.js';const pdf=await pj.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;let out='';for(let i=1;i<=pdf.numPages;i++){const tc=await (await pdf.getPage(i)).getTextContent();let last=null;for(const it of tc.items){if(last!==null&&Math.abs(it.transform[5]-last)>2)out+='\n';else if(out&&!out.endsWith('\n')&&!out.endsWith(' '))out+=' ';out+=it.str;last=it.transform[5]}out+='\n\n'}return out}
+ if(n.endsWith('.docx')){await lib('lib/mammoth.browser.min.js');return (await window.mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()})).value}
+ if(n.endsWith('.doc'))throw{code:'x',message:'old .doc files are not supported; save as .docx or PDF'};
+ return await file.text()}
+
+/* ---------- prompts ---------- */
+const NO_INVENT='Use only what the text states. Never infer, round, upgrade or invent a number, title, date, employer, tool or outcome. Copy every figure exactly as written. If something is unclear, leave it out.';
+function extractPrompt(src,text,part,parts,tail){return `You are building a structured career fact base for one job seeker from a source document. ${NO_INVENT}
+
+Split the source into atomic, reusable facts: one accomplishment, responsibility, skill group, credential or project per fact. Write each fact as a complete standalone statement that keeps its numbers, scope, partner and product names, and context, so a resume writer can reuse it without seeing the source. Do not merge separate accomplishments. Do not drop detail to be brief.
+
+Roles already in the fact base (if a role in the source is the same job, reuse its company and title strings exactly):
+${JSON.stringify(S.roles.map(r=>({company:r.company,title:r.title,start:r.start,end:r.end})))}
+
+Reply with only JSON in this shape:
+{"profile":{"name":"","headline":"","email":"","phone":"","location":"","links":[""]},
+"roles":[{"company":"","title":"","location":"","start":"Mon YYYY","end":"Mon YYYY or Present"}],
+"facts":[{"kind":"achievement|responsibility|skill|project|education|certification|award|summary|other","text":"","company":"","title":"","tags":["2-5 short topical tags"]}]}
+For facts tied to a job, set company and title to that role's strings; otherwise leave them empty. Leave unknown profile fields empty.
+
+SOURCE TYPE: ${src.type}
+SOURCE TITLE: ${src.title}${parts>1?'\nThis is part '+(part+1)+' of '+parts+' of the source. It may open in the middle of a role; the previous part ended with:\n'+tail+'\n':''}
+SOURCE TEXT:
+${text}`}
+function jobPrompt(j){return `Analyze this job posting for resume targeting. Reply with only JSON:
+{"company":"","title":"","location":"","seniority":"","summary":"two sentences on what this hire must deliver",
+"mustHaves":["hard requirements, in the posting's words"],"niceToHaves":[""],
+"keywords":[{"term":"exact phrase from the posting","variants":["common equivalent spellings, acronyms or synonyms an ATS or recruiter would also search"],"type":"skill|tool|domain|title|credential|soft","weight":3}]}
+Give 20 to 32 keywords, the terms an ATS or recruiter screen would match on. weight 3 = appears in the title or requirements or is repeated, 2 = stated responsibility, 1 = nice to have. Prefer specific multi-word phrases over generic words. Skip boilerplate, benefits and legal text.
+
+${j.company?'COMPANY: '+j.company+'\n':''}${j.title?'TITLE: '+j.title+'\n':''}POSTING:
+${String(j.jdText).slice(0,30000)}`}
+function interviewPrompt(job){return `You are a resume strategist running an intake interview. Below is the candidate's fact base${job?' and a target job':''}. Ask the 7 questions whose answers would most strengthen the resume: missing numbers (revenue, quota, partner counts, growth, team size, deal size), unclear scope, tools and platforms, and evidence for the target requirements that the fact base does not yet cover. Each question must name the specific role or fact it refers to. Do not ask about anything already answered in the facts.
+
+Reply with only JSON: {"questions":[{"q":"","why":"one short clause on what this unlocks","company":"","title":""}]}
+
+ROLES: ${JSON.stringify(sortedRoles().map(r=>({company:r.company,title:r.title,dates:roleDates(r)})))}
+FACTS:
+${factLines()}
+${job&&job.analysis?'TARGET JOB: '+JSON.stringify({title:job.title,company:job.company,mustHaves:job.analysis.mustHaves,keywords:job.analysis.keywords.map(k=>k.term)}):''}`}
+function factLines(){return usableFacts().map(f=>f.id+' | '+f.kind+' | '+(f.roleId||'-')+' | '+f.text.replace(/\s+/g,' ')).join('\n')}
+function writerPrompt(job,extra,prev){const a=job.analysis||{};return `You are a master resume writer with a track record of landing interviews for experienced professionals in any field. Write a bespoke resume for the target job below, built only from the candidate's fact base.
+
+TRUTH RULES (absolute)
+- Every line must be supported by the facts you cite. ${NO_INVENT}
+- A number may appear only if the same number appears in a fact you cite for that line. No estimates, no ranges, no "approximately".
+- If the job requires something the facts do not support, do not write it. List it in "gaps".
+- Keep every role's company, title and dates exactly as given. Never retitle a role.
+
+WRITING RULES
+- Mirror the posting's exact terms wherever the facts truthfully support them, so ATS and recruiter keyword screens match. Use the posting's phrasing over a synonym.
+- Bullets: strong verb first, then scope, then result. One idea each, 14 to 30 words. Lead each role with the bullets most relevant to this job. No first person, no filler ("responsible for", "results-driven", "proven track record").
+- Recent and relevant roles get 4 to 6 bullets; older or less relevant roles get 1 to 3. Include every role so there are no date gaps, newest first.
+- Summary: 3 sentences aimed at this job, opening with the candidate's professional identity in the posting's language, grounded in facts.
+- Headline: the target title or closest truthful equivalent, plus 2 or 3 specialties.
+- Skills: 3 to 4 groups of the posting's keywords the facts support, most important first.
+- ${D('len')==='1'?'Fit one page: about 380 to 480 words in total, 2 to 4 bullets for recent relevant roles and 1 for older ones.':'Fit two pages: about 650 to 850 words in total.'}
+- Plain text only. No tables, columns, icons, emoji or special symbols.
+${standing().length?'\nSTANDING INSTRUCTIONS FROM THE CANDIDATE (follow unless they conflict with the truth rules)\n'+standing().map(m=>'- '+m.text).join('\n'):''}${learned().some(m=>m.on!==false)?'\nLEARNED FROM THIS CANDIDATE\'S OWN EDITS AND RESULTS (apply in proportion to strength, 5 is strongest; "avoid" means do less of it; the truth rules always win)\n'+learned().filter(m=>m.on!==false).sort((a,b)=>b.strength-a.strength).map(m=>'- ['+m.dir+', strength '+m.strength+'] '+m.text).join('\n'):''}${editPairs().length?'\nRECENT HAND EDITS BY THE CANDIDATE (match the style of the "after" lines)\n'+editPairs().slice(0,6).map(x=>'- before: '+x.before+'\n  after: '+x.after).join('\n'):''}${extra?'\nDIRECTION FOR THIS VERSION\n'+extra:''}
+
+Reply with only JSON in this shape:
+{"headline":"","summary":"","skills":[{"group":"","items":[""]}],
+"experience":[{"roleId":"","company":"","title":"","location":"","dates":"","bullets":[{"text":"","facts":["fact ids"]}]}],
+"projects":[{"name":"","text":"","facts":["fact ids"]}],"education":[{"text":""}],"certifications":[{"text":""}],
+"gaps":[{"requirement":"","note":"what evidence would close it"}],"notes":"two sentences on the positioning angle you chose"}
+
+CANDIDATE: ${JSON.stringify({name:S.profile.name,headline:S.profile.headline,location:S.profile.location})}
+ROLES: ${JSON.stringify(sortedRoles().map(r=>({roleId:r.id,company:r.company,title:r.title,location:r.location,dates:roleDates(r)})))}
+FACTS (id | kind | roleId | text):
+${factLines()}
+
+TARGET JOB: ${JSON.stringify({company:job.company,title:job.title,seniority:a.seniority,summary:a.summary,mustHaves:a.mustHaves,niceToHaves:a.niceToHaves,keywords:(a.keywords||[]).map(k=>({term:k.term,weight:k.weight}))})}
+POSTING TEXT:
+${String(job.jdText).slice(0,14000)}${prev&&prev.adapt?`\n\nADAPTATION TASK\nBelow is a resume this candidate wrote for a different job. Use it as the starting point for this posting: keep the lines that serve this job, reword them to this posting's terms, reorder for relevance, and replace lines that do not fit with better material from the fact base. Every line must still cite facts and obey the truth rules.\nSTARTING RESUME: ${JSON.stringify(prev.resume)}`:''}${prev&&!prev.adapt?`\n\nREVISION TASK\nBelow is the current draft. Return an improved full resume in the same JSON shape. Keep what already works and keep every line truthful.${prev.terms.length?'\n- Work in these posting terms, which the fact base supports, only in lines whose cited facts support them: '+prev.terms.join('; '):''}${prev.flagged.length?'\n- These lines contain numbers that are not in their cited facts. Correct each to match the facts exactly, or remove the number:\n'+prev.flagged.map(f=>'  * '+f).join('\n'):''}
+CURRENT DRAFT: ${JSON.stringify(prev.resume)}`:''}`}
+
+/* ---------- actions ---------- */
+function mergeExtraction(d,src){d=d||{};const p=d.profile||{};for(const k of ['name','headline','email','phone','location'])if(p[k]&&!S.profile[k])S.profile[k]=String(p[k]);const links=new Set([...(S.profile.links||[]),...((p.links||[]).filter(Boolean))]);S.profile.links=[...links];
+ const key=(c,t)=>norm(c)+'|'+norm(t);
+ for(const r of d.roles||[]){if(!r||!r.company)continue;let ex=S.roles.find(x=>key(x.company,x.title)===key(r.company,r.title));if(!ex){ex={id:uid('r'),company:r.company,title:r.title||'',location:r.location||'',start:r.start||'',end:r.end||''};S.roles.push(ex)}else for(const k of ['location','start','end'])if(!ex[k]&&r[k])ex[k]=r[k]}
+ const seen=new Set(S.facts.map(f=>norm(f.text)));let added=0;
+ for(const f of d.facts||[]){const text=String((f&&f.text)||'').trim();if(!text||seen.has(norm(text)))continue;seen.add(norm(text));let role=null;if(f.company){role=S.roles.find(x=>key(x.company,x.title)===key(f.company,f.title));if(!role){const c=S.roles.filter(x=>norm(x.company)===norm(f.company));if(c.length===1)role=c[0]}}S.facts.push({id:uid('f'),kind:KINDS.includes(f.kind)?f.kind:'other',text,roleId:role?role.id:'',tags:(f.tags||[]).slice(0,5).map(String),src:src.id,ok:src.trusted!==false});added++}
+ src.factCount=(src.factCount||0)+added;src.extractedAt=Date.now();Store.state('profile');Store.state('roles');Store.state('facts');Store.item('sources',src);return added}
+function chunks(text,max){max=max||14000;if(text.length<=max)return[text];const out=[];let cur='';for(let line of text.split('\n')){while(line.length>max){if(cur){out.push(cur);cur=''}out.push(line.slice(0,max));line=line.slice(max)}if(cur.length+line.length+1>max){out.push(cur);cur=''}cur+=line+'\n'}if(cur.trim())out.push(cur);return out.slice(0,9)}
+async function extractAll(src){const cs=chunks(String(src.text));let n=0;for(let i=0;i<cs.length;i++){setBusy('Extracting facts'+(cs.length>1?', part '+(i+1)+' of '+cs.length:''));n+=mergeExtraction(await askJSON(extractPrompt(src,cs[i],i,cs.length,i?cs[i-1].slice(-500):'')),src)}return n}
+async function addSource(){const type=D('srcType')||'resume';let text=D('srcText').trim();const fi=$('#srcFile');const file=fi&&fi.files[0];await run('Reading source',async()=>{if(file){try{text=(await fileToText(file)).trim()+(text?'\n\n'+text:'')}catch(e){throw e.code==='lib'?e:{code:'x',message:e.message||'that file could not be read'}}}
+  if(text.length<40){toast('Add a file or paste some text first.','bad');return}
+  const src={id:uid('s'),type,title:D('srcTitle').trim()||(file?file.name:type+' text'),text:text.slice(0,150000),addedAt:Date.now(),trusted:true};S.sources.push(src);Store.item('sources',src);S.ui.draft.srcText='';S.ui.draft.srcTitle='';
+  const n=await extractAll(src);toast(n+' facts added from '+src.title)})}
+async function reExtract(id){const src=S.sources.find(s=>s.id===id);if(!src)return;await run('Extracting facts',async()=>{const n=await extractAll(src);toast(n+' new facts from '+src.title)})}
+function delSource(id){S.sources=S.sources.filter(s=>s.id!==id);S.facts=S.facts.filter(f=>f.src!==id);Store.remove('sources',id);Store.state('facts');render()}
+async function addJob(){const jd=D('jobText').trim();if(jd.length<200){toast('Paste the full job description text.','bad');return}const j={id:uid('j'),url:D('jobUrl').trim(),company:D('jobCompany').trim(),title:D('jobTitle').trim(),jdText:jd.slice(0,60000),status:'Saved',addedAt:Date.now()};S.jobs.push(j);Store.item('jobs',j);for(const k of ['jobText','jobUrl','jobCompany','jobTitle'])S.ui.draft[k]='';await analyzeJob(j.id)}
+async function analyzeJob(id){const j=S.jobs.find(x=>x.id===id);if(!j)return;await run('Analyzing job',async()=>{const a=await askJSON(jobPrompt(j));a.keywords=(a.keywords||[]).filter(k=>k&&k.term);if(!j.company)j.company=a.company||'';if(!j.title)j.title=a.title||'';j.analysis=a;Store.item('jobs',j);toast('Job analyzed: '+a.keywords.length+' keywords')})}
+function delJob(id){S.jobs=S.jobs.filter(j=>j.id!==id);for(const r of S.resumes.filter(r=>r.jobId===id))Store.remove('resumes',r.id);S.resumes=S.resumes.filter(r=>r.jobId!==id);Store.remove('jobs',id);render()}
+async function tailor(mode){const job=S.jobs.find(j=>j.id===S.ui.jobId);if(!job)return;let prev=null;if(mode==='revise'){const cur=S.resumes.find(r=>r.id===S.ui.resId);if(!cur||!job.analysis)return;const ev=allEvidence(),sc=scoreText(job,resumeText(cur.resume));prev={label:cur.label,resume:cur.resume,terms:sc.miss.filter(k=>kwHit(ev,k)).map(k=>k.term),flagged:flagsFor(cur.resume).filter(f=>f.nums.length).map(f=>f.text+' [unverified: '+f.nums.join(', ')+']')}}else if(D('base')){const o=S.resumes.find(r=>r.id===D('base')&&r.jobId!==job.id);if(o){const oj=S.jobs.find(j=>j.id===o.jobId)||{};prev={adapt:true,label:o.label+' for '+(oj.company||oj.title||'another job'),resume:o.resume,terms:[],flagged:[]}}}if(!usableFacts().length){toast('Your fact base is empty. Add a source first.','bad');return}const extra=D('extra').trim();await run('Writing resume for '+(job.company||'this job'),async()=>{if(!job.analysis){setBusy('Analyzing job');const a=await askJSON(jobPrompt(job));a.keywords=(a.keywords||[]).filter(k=>k&&k.term);job.analysis=a;if(!job.company)job.company=a.company||'';if(!job.title)job.title=a.title||'';Store.item('jobs',job);setBusy('Writing resume for '+job.company)}
+  const r=await askJSON(writerPrompt(job,extra,prev),'complex');const ids=new Set(S.facts.map(f=>f.id));for(const e of r.experience||[]){const role=S.roles.find(x=>x.id===e.roleId);if(role){e.company=role.company;e.title=role.title;e.dates=roleDates(role);e.location=role.location||e.location||''}for(const b of e.bullets||[])b.facts=(b.facts||[]).filter(x=>ids.has(x))}
+  const n=nextN(job.id);const rec={id:uid('v'),jobId:job.id,n,label:'v'+n,createdAt:Date.now(),extra,resume:r,tpl:TPL[S.profile.tpl]?S.profile.tpl:'classic',kind:prev?(prev.adapt?'reused':'revised'):'written',from:prev?prev.label:''};S.ui.draft.base='';S.resumes.push(rec);Store.item('resumes',rec);S.ui.resId=rec.id;
+  if(extra&&S.ui.draft.remember){S.memory.push({id:uid('m'),text:extra});Store.state('memory')}S.ui.draft.extra='';S.ui.draft.remember=false})}
+async function genQuestions(){const job=S.jobs.find(j=>j.id===D('ivJob'));if(!usableFacts().length){toast('Add a resume first so the questions can target gaps.','bad');return}await run('Preparing questions',async()=>{const d=await askJSON(interviewPrompt(job));S.ui.iv={qs:(d.questions||[]).filter(x=>x&&x.q)};for(const k of Object.keys(S.ui.draft))if(k.startsWith('iva'))delete S.ui.draft[k]})}
+async function saveAnswers(){const iv=S.ui.iv;if(!iv)return;const qa=iv.qs.map((x,i)=>({x,a:D('iva'+i).trim()})).filter(o=>o.a);if(!qa.length){toast('Answer at least one question.','bad');return}const text=qa.map(o=>'Question (about '+[o.x.title,o.x.company].filter(Boolean).join(' at ')+'): '+o.x.q+'\nCandidate answer: '+o.a).join('\n\n');await run('Saving answers as facts',async()=>{const src={id:uid('s'),type:'interview',title:'Intake interview '+new Date().toLocaleDateString(),text,addedAt:Date.now(),trusted:true};S.sources.push(src);Store.item('sources',src);const n=await extractAll(src);S.ui.iv=null;toast(n+' facts added from your answers')})}
+
+async function exportBackup(){await save('resume-engine-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(Object.assign({app:'resume-engine',v:2,exportedAt:new Date().toISOString()},snapshot())))}
+async function readImport(file){try{const o=JSON.parse(await file.text());if(!o||!Array.isArray(o.facts)||!Array.isArray(o.roles))throw 0;S.ui.imp=o;render()}catch(e){toast('That file is not a Resume Engine backup.','bad')}}
+/* ---------- export ---------- */
+function fileBase(rec){const job=S.jobs.find(j=>j.id===rec.jobId)||{};return [S.profile.name||'Resume',job.company,job.title].filter(Boolean).join(' - ').replace(/[^\w .&-]+/g,'').replace(/\s+/g,' ').trim().slice(0,90)}
+async function save(filename,data){let dl=null;try{dl=window.claude&&claude.use?await claude.use('downloads'):null}catch(e){}if(!dl){toast('Downloads are not available in this view. Use Copy text instead.','bad');return}try{await dl.save({filename,data});toast('Saved '+filename)}catch(e){if(e&&e.code!=='declined')toast('Could not save the file ('+((e&&e.code)||'error')+').','bad')}}
+function buildDocx(r,tp){const X=window.docx,P=X.Paragraph,T=X.TextRun,Z=Math.round(tp.size*2+.6),m=tp.margin*20;const run=(t,o)=>new T(Object.assign({text:t,font:tp.docx,size:Z},o||{}));const al=tp.center?X.AlignmentType.CENTER:X.AlignmentType.LEFT;const kids=[];
+ for(const b of blocks(r,tp)){
+  if(b.t==='name')kids.push(new P({alignment:al,children:[run(b.text,{bold:true,size:Z+13})]}));
+  else if(b.t==='headline')kids.push(new P({alignment:al,children:[run(b.text,{size:Z+1})]}));
+  else if(b.t==='contact')kids.push(new P({alignment:al,spacing:{after:80},children:[run(b.text,{size:Z-1})]}));
+  else if(b.t==='head')kids.push(new P(Object.assign({spacing:{before:tp.rule?200:280,after:70},children:[run(b.text.toUpperCase(),{bold:true,size:Z+1})]},tp.rule?{border:{bottom:{style:X.BorderStyle.SINGLE,size:6,color:'000000',space:1}}}:{})));
+  else if(b.t==='para')kids.push(new P({spacing:{after:30},children:[run(b.text)]}));
+  else if(b.t==='skill')kids.push(new P({spacing:{after:30},children:(b.group?[run(b.group+': ',{bold:true})]:[]).concat([run(b.text)])}));
+  else if(b.t==='role')kids.push(new P({spacing:{before:120,after:40},tabStops:[{type:X.TabStopType.RIGHT,position:12240-2*m}],children:[run(b.left,{bold:true}),run('\t'+b.right)]}));
+  else if(b.t==='bullet')kids.push(new P({bullet:{level:0},spacing:{after:30},children:(b.lead?[run(b.lead+': ',{bold:true})]:[]).concat([run(b.text)])}))}
+ const p=S.profile;return new X.Document({creator:p.name||'',title:(p.name||'')+' Resume',sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:m,bottom:m,left:m,right:m}}},children:kids}]})}
+const pdfSafe=s=>String(s??'').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/[–—]/g,'-').replace(/•/g,'-').replace(/ /g,' ').replace(/[^\x09\x0a\x20-\x7e\xa1-\xff]/g,'');
+function buildPdf(r,tp){const doc=new window.jspdf.jsPDF({unit:'pt',format:'letter'});const M=tp.margin,W=612-2*M,BOT=792-M,F=tp.pdf,Z=tp.size;let y=M+10,prev='';const p=S.profile;
+ const need=h=>{if(y+h>BOT){doc.addPage();y=M+10}};
+ const para=(t,o)=>{o=o||{};const size=o.size||Z;doc.setFont(F,o.bold?'bold':'normal');doc.setFontSize(size);const x=M+(o.indent||0);const lines=doc.splitTextToSize(pdfSafe(t),W-(o.indent||0));const lh=size*1.32;lines.forEach((ln,i)=>{need(lh);if(o.center)doc.text(ln,306,y,{align:'center'});else{if(o.bullet&&i===0)doc.text('•',M+4,y);doc.text(ln,x,y)}y+=lh});y+=o.after||0};
+ for(const b of blocks(r,tp)){
+  if(b.t==='name')para(b.text,{size:Z+7,bold:true,center:tp.center});
+  else if(b.t==='headline')para(b.text,{size:Z+.6,center:tp.center});
+  else if(b.t==='contact')para(b.text,{size:Z-.6,center:tp.center,after:2});
+  else if(b.t==='head'){y+=tp.rule?8:13;need(34);doc.setFont(F,'bold');doc.setFontSize(Z+.6);doc.text(pdfSafe(b.text.toUpperCase()),M,y);if(tp.rule){y+=4;doc.setLineWidth(.7);doc.line(M,y,M+W,y);y+=12}else y+=14}
+  else if(b.t==='para')para(b.text,{after:1});
+  else if(b.t==='skill')para((b.group?b.group+': ':'')+b.text,{after:1});
+  else if(b.t==='role'){if(prev!=='head')y+=6;need(Z*4);doc.setFont(F,'normal');doc.setFontSize(Z);const dw=doc.getTextWidth(pdfSafe(b.right));doc.text(pdfSafe(b.right),M+W,y,{align:'right'});doc.setFont(F,'bold');doc.splitTextToSize(pdfSafe(b.left),W-dw-14).forEach(ln=>{need(Z*1.32);doc.text(ln,M,y);y+=Z*1.32});y+=1}
+  else if(b.t==='bullet')para((b.lead?b.lead+': ':'')+b.text,{bullet:true,indent:14,after:1.5});
+  prev=b.t}
+ doc.setProperties({title:pdfSafe((p.name||'')+' Resume'),author:pdfSafe(p.name||'')});return doc}
+async function exportAs(kind){const rec=S.resumes.find(r=>r.id===S.ui.resId);if(!rec)return;const base=fileBase(rec);try{if(kind==='docx'){await lib('lib/docx.umd.js');await save(base+'.docx',await window.docx.Packer.toBlob(buildDocx(rec.resume,tplOf(rec))))}else if(kind==='pdf'){await lib('lib/jspdf.umd.min.js');await save(base+'.pdf',buildPdf(rec.resume,tplOf(rec)).output('blob'))}else if(kind==='txt'){await save(base+'.txt',resumeText(rec.resume))}else{try{await navigator.clipboard.writeText(resumeText(rec.resume));toast('Resume text copied')}catch(e){toast('Copy was blocked. Use the TXT download.','bad')}}}catch(e){console.error(e);toast(errCopy(e),'bad')}}
+
+/* ---------- views ---------- */
+function vSteps(){const st=[[S.sources.length>0,'1','Add sources','Resume, LinkedIn, site, projects','sources'],[S.facts.length>0,'2','Review facts','Edit, switch off, add detail','facts'],[S.jobs.length>0,'3','Add a job','Paste the posting','jobs'],[S.resumes.length>0,'4','Tailor','Write, score, export','tailor']];return '<div class="steps">'+st.map(s=>'<div class="'+(s[0]?'done':'')+'"><i>'+s[1]+(s[0]?' done':'')+'</i><b>'+s[2]+'</b>'+s[3]+'</div>').join('')+'</div>'}
+function vSources(){const types=[['resume','Resume'],['linkedin','LinkedIn profile'],['website','Website or portfolio'],['project','Project write-up'],['other','Other']];
+ return '<div class="stack">'+vSteps()+'<div class="card"><h2>Add a source</h2><p class="lede">Upload or paste anything that describes your work. The engine splits it into reusable facts and keeps every number exactly as written. Your data is private to you; text you add is sent to Claude, on your own Claude account, to be read and written.</p><div class="grid2"><label>Type<select id="srcType" data-draft="srcType">'+types.map(t=>'<option value="'+t[0]+'"'+(D('srcType')===t[0]?' selected':'')+'>'+t[1]+'</option>').join('')+'</select></label><label>Label (optional)<input type="text" id="srcTitle" data-draft="srcTitle" value="'+esc(D('srcTitle'))+'" placeholder="Master resume, Nov 2026"></label></div><label>File: PDF, DOCX, TXT or MD<input type="file" id="srcFile" accept=".pdf,.docx,.txt,.md,.markdown,.rtf"></label><label>Or paste text<textarea id="srcText" data-draft="srcText" placeholder="Paste your LinkedIn About and Experience sections, portfolio copy, project notes, performance reviews, award write-ups.">'+esc(D('srcText'))+'</textarea></label><div class="row"><button class="primary" data-act="addSource">Add source and extract facts</button></div></div>'
+ +'<div class="card"><h2>Sources</h2>'+(S.sources.length?S.sources.slice().sort((a,b)=>b.addedAt-a.addedAt).map(s=>'<div class="item"><div class="row"><h3 style="margin-right:auto">'+esc(s.title)+'</h3><span class="chip">'+esc(s.type)+'</span>'+(s.trusted===false?'<span class="chip have">needs review</span>':'')+'</div><div class="small">'+(s.text||'').length.toLocaleString()+' characters · '+(s.extractedAt?(s.factCount||0)+' facts extracted':'not extracted yet')+'</div><div class="row"><button data-act="reExtract" data-id="'+s.id+'">'+(s.extractedAt?'Extract again':'Extract facts')+'</button><button class="quiet danger" data-act="delSource" data-id="'+s.id+'" data-confirm="Delete source and its facts?">Delete</button></div></div>').join(''):'<p class="lede">Nothing here yet. Start with your master resume, then add your LinkedIn profile text.</p>')+'</div></div>'}
+function vFact(f){const ro='<option value="">No role</option>'+sortedRoles().map(r=>'<option value="'+r.id+'"'+(r.id===f.roleId?' selected':'')+'>'+esc(r.title+' \u00b7 '+r.company)+'</option>').join('');return '<div class="fact'+(f.ok===false?' off':'')+'"><input type="checkbox" id="ok-'+f.id+'" aria-label="Use this fact" data-chg="factOk" data-id="'+f.id+'"'+(f.ok!==false?' checked':'')+'><div><div class="ftext" contenteditable="true" data-edit="fact" data-id="'+f.id+'">'+esc(f.text)+'</div><details class="fmeta"><summary class="chips"><span class="chip acc">'+esc(f.kind)+'</span>'+(f.tags||[]).map(t=>'<span class="chip">'+esc(t)+'</span>').join('')+'<span class="chip">move</span></summary><div class="grid2"><label>Kind<select id="fk-'+f.id+'" data-chg="factKind" data-id="'+f.id+'">'+KINDS.map(k=>'<option'+(k===f.kind?' selected':'')+'>'+k+'</option>').join('')+'</select></label><label>Belongs to<select id="fr-'+f.id+'" data-chg="factRole" data-id="'+f.id+'">'+ro+'</select></label></div></details></div><button class="quiet danger" data-act="delFact" data-id="'+f.id+'" aria-label="Delete fact">\u00d7</button></div>'}
+function vFacts(){const p=S.profile,q=norm(S.ui.q);const show=f=>!q||norm(f.text+' '+(f.tags||[]).join(' ')+' '+f.kind).includes(q);const pf=(k,l,ph)=>'<label>'+l+'<input type="text" id="pf-'+k+'" data-chg="profile" data-k="'+k+'" value="'+esc(k==='links'?(p.links||[]).join(', '):p[k])+'" placeholder="'+(ph||'')+'"></label>';
+ const off=S.facts.filter(f=>f.ok===false).length;
+ let h='<div class="stack"><div class="card"><h2>Contact header</h2><div class="grid2">'+pf('name','Name')+pf('headline','Default headline')+pf('email','Email')+pf('phone','Phone')+pf('location','Location','City, ST')+pf('links','Links, comma separated','linkedin.com/in/you')+'</div></div>';
+ h+='<div class="card"><div class="row"><h2 style="margin-right:auto">'+S.facts.length+' facts'+(off?', '+off+' switched off':'')+'</h2><button data-act="addRole">Add role</button></div><p class="lede">This is the only material the writer may use. Edit any line in place. Untick a fact to keep it out of resumes.</p><label>Filter<input type="text" id="factQ" data-input="q" value="'+esc(S.ui.q)+'" placeholder="partner, revenue, Ingram, AI"></label></div>';
+ for(const r of sortedRoles()){const fs=S.facts.filter(f=>f.roleId===r.id&&show(f));if(q&&!fs.length)continue;const rf=(k,l)=>'<label>'+l+'<input type="text" id="r-'+r.id+'-'+k+'" data-chg="role" data-id="'+r.id+'" data-k="'+k+'" value="'+esc(r[k])+'"></label>';
+  h+='<div class="card"><div class="grid2">'+rf('title','Title')+rf('company','Company')+rf('location','Location')+rf('start','Start')+rf('end','End')+'</div><div>'+fs.map(vFact).join('')+'</div><div class="row"><button data-act="addFact" data-id="'+r.id+'">Add fact</button>'+(S.roles.length>1?'<label style="flex-direction:row;align-items:center;gap:6px">Same job listed twice? Merge into<select id="mg-'+r.id+'" data-chg="mergeRole" data-id="'+r.id+'" style="width:auto;max-width:220px;padding:6px 8px"><option value="">Choose role</option>'+sortedRoles().filter(x=>x.id!==r.id).map(x=>'<option value="'+x.id+'">'+esc(x.title+' \u00b7 '+x.company)+'</option>').join('')+'</select></label>':'')+'<button class="quiet danger" data-act="delRole" data-id="'+r.id+'" data-confirm="Delete role and its facts?">Delete role</button></div></div>'}
+ const loose=S.facts.filter(f=>!S.roles.some(r=>r.id===f.roleId)&&show(f));
+ h+='<div class="card"><h2>Skills, education, projects and other</h2><div>'+(loose.length?KINDS.flatMap(k=>loose.filter(f=>f.kind===k)).map(vFact).join(''):'<p class="lede">Facts not tied to a role appear here.</p>')+'</div><div class="row"><button data-act="addFact" data-id="">Add fact</button></div></div></div>';return h}
+function fitFor(j){return j.analysis?scoreText(j,allEvidence()):null}
+function vJobs(){let h='<div class="stack"><div class="card"><h2>Add a job</h2><p class="lede">Paste the full posting text. This page cannot open links itself, so the link is kept for your records.'+(Store.owner?' You can also send a link to Claude in chat and have the posting loaded here.':'')+'</p><div class="grid2"><label>Company<input type="text" id="jobCompany" data-draft="jobCompany" value="'+esc(D('jobCompany'))+'"></label><label>Job title<input type="text" id="jobTitle" data-draft="jobTitle" value="'+esc(D('jobTitle'))+'"></label></div><label>Posting link (optional)<input type="url" id="jobUrl" data-draft="jobUrl" value="'+esc(D('jobUrl'))+'" placeholder="https://"></label><label>Job description<textarea id="jobText" data-draft="jobText" style="min-height:160px">'+esc(D('jobText'))+'</textarea></label><div class="row"><button class="primary" data-act="addJob">Add and analyze</button></div></div>';
+ h+='<div class="card"><h2>Jobs</h2>'+(S.jobs.length?S.jobs.slice().sort((a,b)=>b.addedAt-a.addedAt).map(j=>{const fit=fitFor(j),n=S.resumes.filter(r=>r.jobId===j.id).length;return '<div class="item"><div class="row"><h3 style="margin-right:auto">'+esc(j.title||'Untitled role')+(j.company?' · '+esc(j.company):'')+'</h3>'+(fit?'<span class="chip '+(fit.pct>=70?'hit':fit.pct>=45?'have':'miss')+'">evidence '+fit.pct+'%</span>':'<span class="chip have">not analyzed</span>')+'</div>'+(j.analysis&&j.analysis.summary?'<p class="small">'+esc(j.analysis.summary)+'</p>':'')+(fit&&fit.miss.length?'<div class="chips">'+fit.miss.slice(0,8).map(k=>'<span class="chip miss">'+esc(k.term)+'</span>').join('')+'</div><p class="small">No evidence yet for the terms above. If you have it, add a fact or run the interview.</p>':'')+'<div class="row"><button class="primary" data-act="openTailor" data-id="'+j.id+'">'+(n?'Open '+n+' version'+(n>1?'s':''):'Tailor resume')+'</button>'+(j.analysis?'':'<button data-act="analyzeJob" data-id="'+j.id+'">Analyze</button>')+'<label style="flex-direction:row;align-items:center;gap:6px">Status<select id="st-'+j.id+'" data-chg="jobStatus" data-id="'+j.id+'" style="width:auto;padding:6px 8px">'+STATUSES.map(s=>'<option'+(j.status===s?' selected':'')+'>'+s+'</option>').join('')+'</select></label>'+(/^https?:\/\//i.test(j.url||'')?'<a href="'+esc(j.url)+'" target="_blank" rel="noopener">Posting</a>':'')+'<button class="quiet danger" data-act="delJob" data-id="'+j.id+'" data-confirm="Delete job and its versions?">Delete</button></div></div>'}).join(''):'<p class="lede">No jobs yet. Each job you add gets a keyword map and an evidence score against your fact base.</p>')+'</div></div>';return h}
+const STD=['summary','skills','experience','projects','education','certifications'];
+const TPL={classic:{name:'Classic',note:'centered header, ruled headings',docx:'Calibri',pdf:'helvetica',css:"Arial,Helvetica,sans-serif",center:true,rule:true,size:10.2,margin:48,order:STD,labels:{}},
+ modern:{name:'Modern',note:'left aligned, open headings',docx:'Arial',pdf:'helvetica',css:"'Helvetica Neue',Arial,sans-serif",center:false,rule:false,size:10,margin:52,order:STD,labels:{}},
+ executive:{name:'Executive',note:'serif, experience before skills',docx:'Georgia',pdf:'times',css:"Georgia,'Times New Roman',serif",center:true,rule:true,size:10.8,margin:54,order:['summary','experience','skills','projects','education','certifications'],labels:{summary:'Professional Summary',skills:'Core Competencies',experience:'Professional Experience'}},
+ compact:{name:'Compact',note:'tight margins for one page',docx:'Calibri',pdf:'helvetica',css:"Arial,Helvetica,sans-serif",center:false,rule:true,size:9.3,margin:36,order:STD,labels:{}}};
+const tplOf=rec=>TPL[rec&&rec.tpl]||TPL[S.profile.tpl]||TPL.classic;
+function blocks(r,tp){const p=S.profile,L=tp.labels||{},B=[];const head=(k,d)=>B.push({t:'head',text:L[k]||d});
+ B.push({t:'name',text:p.name||'Your name'});if(r.headline)B.push({t:'headline',text:r.headline,path:'headline'});const main=[p.location,p.phone,p.email].filter(Boolean).join(' | '),links=(p.links||[]).filter(Boolean).join(' | ');if(main&&links&&(main+' | '+links).length>88){B.push({t:'contact',text:main});B.push({t:'contact',text:links})}else B.push({t:'contact',text:contactLine()});
+ const sec={summary(){if(r.summary){head('summary','Summary');B.push({t:'para',text:r.summary,path:'summary',flag:'summary'})}},
+  skills(){if((r.skills||[]).length){head('skills','Skills');r.skills.forEach((g,i)=>B.push({t:'skill',group:g.group||'',text:(g.items||[]).join(', '),path:'skills.'+i}))}},
+  experience(){if((r.experience||[]).length){head('experience','Experience');r.experience.forEach((e,i)=>{B.push({t:'role',left:[e.title,e.company].filter(Boolean).join(', ')+(e.location?' | '+e.location:''),right:e.dates||''});(e.bullets||[]).forEach((b,j)=>B.push({t:'bullet',text:b.text,path:'experience.'+i+'.'+j,flag:'e'+i+'b'+j}))})}},
+  projects(){if((r.projects||[]).length){head('projects','Projects');r.projects.forEach((x,i)=>B.push({t:'bullet',lead:x.name||'',text:x.text,path:'projects.'+i,flag:'p'+i}))}},
+  education(){if((r.education||[]).length){head('education','Education');r.education.forEach((x,i)=>B.push({t:'para',text:x.text,path:'education.'+i}))}},
+  certifications(){if((r.certifications||[]).length){head('certifications','Certifications');r.certifications.forEach((x,i)=>B.push({t:'para',text:x.text,path:'certifications.'+i}))}}};
+ for(const k of tp.order)sec[k]();return B}
+function vSheet(rec,flags){const tp=tplOf(rec),lock=!!rec.sentAt,fl=new Set(flags.map(f=>f.where)),al=tp.center?'center':'left';
+ const ed=b=>'<span'+(lock?'':' contenteditable="true"')+' data-edit="res" data-path="'+b.path+'" class="'+(b.flag&&fl.has(b.flag)?'flag':'')+'">'+esc(b.text)+'</span>';
+ let h='<div class="sheet'+(tp.rule?'':' norule')+'" style="font-family:'+tp.css+';font-size:'+(tp.size+2.6).toFixed(1)+'px">',ul=false;
+ for(const b of blocks(rec.resume,tp)){if(ul&&b.t!=='bullet'){h+='</ul>';ul=false}
+  if(b.t==='name')h+='<h4 style="text-align:'+al+'">'+esc(b.text)+'</h4>';
+  else if(b.t==='headline')h+='<div style="text-align:'+al+'">'+ed(b)+'</div>';
+  else if(b.t==='contact')h+='<div class="contact" style="text-align:'+al+'">'+esc(b.text||'Add contact details in Fact base')+'</div>';
+  else if(b.t==='head')h+='<h5>'+esc(b.text)+'</h5>';
+  else if(b.t==='para')h+='<div>'+ed(b)+'</div>';
+  else if(b.t==='skill')h+='<div>'+(b.group?'<b>'+esc(b.group)+':</b> ':'')+ed(b)+'</div>';
+  else if(b.t==='role')h+='<div class="role"><span>'+esc(b.left)+'</span><span>'+esc(b.right)+'</span></div>';
+  else if(b.t==='bullet'){if(!ul){h+='<ul>';ul=true}h+='<li>'+(b.lead?'<b>'+esc(b.lead)+':</b> ':'')+ed(b)+'</li>'}}
+ return h+(ul?'</ul>':'')+'</div>'}
+function diffLines(a,b){const A=a.split('\n').map(x=>x.trim()).filter(Boolean),B=b.split('\n').map(x=>x.trim()).filter(Boolean),n=A.length,m=B.length,dp=Array.from({length:n+1},()=>new Uint16Array(m+1));for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)dp[i][j]=A[i]===B[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);const out=[];let i=0,j=0;while(i<n&&j<m){if(A[i]===B[j]){out.push({t:'=',s:A[i]});i++;j++}else if(dp[i+1][j]>=dp[i][j+1])out.push({t:'-',s:A[i++]});else out.push({t:'+',s:B[j++]})}while(i<n)out.push({t:'-',s:A[i++]});while(j<m)out.push({t:'+',s:B[j++]});return out}
+const learned=()=>S.memory.filter(m=>m.kind==='learned');
+const standing=()=>S.memory.filter(m=>m.kind!=='learned');
+function editPairs(){const out=[];for(const v of S.resumes.filter(v=>v.orig).sort((a,b)=>(b.editedAt||0)-(a.editedAt||0))){const d=diffLines(resumeText(v.orig),resumeText(v.resume));for(let i=0;i<d.length;i++)if(d[i].t==='-'){if(d[i+1]&&d[i+1].t==='+'){out.push({before:d[i].s,after:d[i+1].s});i++}else out.push({before:d[i].s,after:'(deleted)'})}}return out.slice(0,30)}
+function outcomes(){return S.resumes.filter(v=>v.sentAt).map(v=>{const j=S.jobs.find(x=>x.id===v.jobId)||{},t=resumeText(v.resume);return{v,job:j,status:j.status||'Applied',good:['Interview','Offer'].includes(j.status),closed:['Interview','Offer','Rejected','No response'].includes(j.status),tpl:tplOf(v).name,words:words(t),score:j.analysis?scoreText(j,t).pct:null,kind:v.kind||'written'}})}
+function signalCount(){const t=S.profile.learnedAt||0;return S.resumes.filter(v=>v.orig&&(v.editedAt||0)>t).length+S.jobs.filter(j=>(j.statusAt||0)>t&&STATUSES.indexOf(j.status)>1&&S.resumes.some(v=>v.jobId===j.id&&v.sentAt)).length}
+function statGroups(){const o=outcomes().filter(x=>x.closed);const g=(name,fn)=>{const m={};for(const x of o){const k=fn(x);if(k==null)continue;m[k]=m[k]||[0,0];m[k][1]++;if(x.good)m[k][0]++}return{name,rows:Object.entries(m)}};return{n:o.length,sent:outcomes().length,groups:[g('Template',x=>x.tpl),g('Length',x=>x.words<=560?'One page':'Two pages'),g('Keyword match',x=>x.score==null?null:x.score>=80?'80% and up':x.score>=60?'60 to 79%':'Under 60%'),g('How it was made',x=>({revised:'Revised',copy:'Edited copy',reused:'Reused from another job'})[x.kind]||'Fresh write')]}}
+function learnPrompt(pairs,oc){return `You maintain the learned writing preferences for one job seeker's resume writer. Update the lesson list from the evidence below.
+
+RULES
+- A lesson is about writing or positioning choices only: wording, verbs, tone, bullet shape, what to lead with, section emphasis, length, template, headline or summary style. Never a fact about the candidate, and never anything that would add a claim or a number.
+- From EDITS: the "after" lines show what this candidate prefers. Write a lesson when the same kind of change shows up at least twice, or once when it is plainly deliberate.
+- From OUTCOMES: Interview and Offer are progress; Rejected and No response are not. Only draw a lesson when at least 2 sent versions point the same way, and say "early signal" in the evidence when fewer than 5 outcomes back it. Do not invent a pattern from one result. Many things outside the resume decide outcomes, so keep outcome lessons modest.
+- Reinforce: raise the strength (maximum 5) of a current lesson that new evidence supports. Reduce: lower the strength of one the evidence contradicts, and leave it out once it would fall below 1. Keep a current lesson unchanged when nothing bears on it, reusing its id.
+- "dir" is "do" for something to do more and "avoid" for something to do less.
+- At most 12 lessons. Each is one imperative sentence of 25 words or fewer. Evidence is one short clause with counts.
+- Never re-add anything listed under DROPPED BY THE CANDIDATE.
+
+Reply with only JSON: {"lessons":[{"id":"id of the current lesson, or empty for a new one","text":"","dir":"do|avoid","strength":3,"basis":"edits|outcomes|both","evidence":""}],"summary":"two sentences on what changed and why"}
+
+CURRENT LESSONS: ${JSON.stringify(learned().map(m=>({id:m.id,text:m.text,dir:m.dir,strength:m.strength,basis:m.basis,switchedOff:m.on===false})))}
+DROPPED BY THE CANDIDATE: ${JSON.stringify((S.profile.dropped||[]))}
+EDITS (${pairs.length}):
+${pairs.map(x=>'- before: '+x.before+'\n  after: '+x.after).join('\n')||'none'}
+DIRECTIONS THE CANDIDATE TYPED WHEN ASKING FOR VERSIONS: ${JSON.stringify([...new Set(S.resumes.map(v=>v.extra).filter(Boolean))].slice(-12))}
+OUTCOMES OF SENT VERSIONS (${oc.length}):
+${oc.map(x=>JSON.stringify({job:(x.job.title||'')+' at '+(x.job.company||''),outcome:x.status,template:x.tpl,words:x.words,keywordMatch:x.score,madeBy:x.kind,headline:x.v.resume.headline,summary:x.v.resume.summary,firstBullets:(x.v.resume.experience||[]).slice(0,2).flatMap(e=>(e.bullets||[]).slice(0,2).map(b=>b.text))})).join('\n')||'none'}`}
+async function learn(){const pairs=editPairs(),oc=outcomes();if(!pairs.length&&!oc.some(x=>x.closed)){toast('Nothing to learn from yet. Edit a version, or mark one as sent and record how the job went.','bad');return}
+ await run('Updating what the engine has learned',async()=>{const d=await askJSON(learnPrompt(pairs,oc));const old=learned(),byId=Object.fromEntries(old.map(m=>[m.id,m])),next=[];
+  for(const l of (d.lessons||[]).slice(0,12)){if(!l||!l.text)continue;const ex=byId[l.id];next.push({id:ex?ex.id:uid('m'),kind:'learned',text:String(l.text),dir:l.dir==='avoid'?'avoid':'do',strength:Math.max(1,Math.min(5,Math.round(+l.strength||1))),was:ex?ex.strength:null,basis:['edits','outcomes','both'].includes(l.basis)?l.basis:'edits',evidence:String(l.evidence||''),on:ex?ex.on!==false:true})}
+  for(const m of old)if(m.on===false&&!next.some(n=>n.id===m.id))next.push(m);
+  S.memory=standing().concat(next);S.profile.learnedAt=Date.now();S.profile.learnNote=String(d.summary||'');Store.state('memory');Store.state('profile');toast('Learning updated: '+next.filter(n=>n.on!==false).length+' active lessons')})}
+const verN=v=>+v.n||+(String(v.label).match(/^v(\d+)/)||[])[1]||0;
+function nextN(jobId){return Math.max(0,...S.resumes.filter(r=>r.jobId===jobId).map(verN))+1}
+const shortDate=t=>new Date(t).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+function vTailor(){if(!S.jobs.length)return '<div class="stack">'+vSteps()+'<div class="card"><h2>No job to tailor for yet</h2><p class="lede">Add a job posting first. Then this tab writes a version of your resume for it and scores the match.</p><div class="row"><button class="primary" data-act="go" data-id="jobs">Add a job</button></div></div></div>';
+ if(!S.jobs.some(j=>j.id===S.ui.jobId))S.ui.jobId=S.jobs.slice().sort((a,b)=>b.addedAt-a.addedAt)[0].id;const job=S.jobs.find(j=>j.id===S.ui.jobId);const vers=S.resumes.filter(r=>r.jobId===job.id).sort((a,b)=>a.createdAt-b.createdAt);if(!vers.some(v=>v.id===S.ui.resId))S.ui.resId=vers.length?vers[vers.length-1].id:null;const rec=vers.find(v=>v.id===S.ui.resId);
+ let h='<div class="stack"><div class="card"><div class="grid2"><label>Job<select id="tJob" data-chg="pickJob">'+S.jobs.map(j=>'<option value="'+j.id+'"'+(j.id===job.id?' selected':'')+'>'+esc((j.title||'Untitled')+(j.company?' · '+j.company:''))+'</option>').join('')+'</select></label><label>Length<select id="len" data-draft="len"><option value="2">Two pages</option><option value="1"'+(D('len')==='1'?' selected':'')+'>One page</option></select></label>'+(S.resumes.some(v=>v.jobId!==job.id)?'<label>Start from<select id="base" data-draft="base" data-chg="pickBase"><option value="">Your fact base, written fresh (recommended)</option>'+S.resumes.filter(v=>v.jobId!==job.id).sort((a,b)=>b.createdAt-a.createdAt).slice(0,40).map(v=>{const oj=S.jobs.find(j=>j.id===v.jobId)||{};return '<option value="'+v.id+'"'+(D('base')===v.id?' selected':'')+'>Adapt '+esc(v.label+' for '+(oj.company||oj.title||'another job'))+'</option>'}).join('')+'</select></label>':'')+'</div>'+(D('base')?'<p class="small">Adapting another job\u2019s resume carries over its angle. A fresh write usually fits the posting better.</p>':'')+(signalCount()?'<div class="banner">'+signalCount()+' new signal'+(signalCount()>1?'s':'')+' from your edits and results since the engine last learned. <button data-act="learn">Update learning</button></div>':'')+'<label>Direction for this version (optional)<textarea id="extra" data-draft="extra" style="min-height:64px" placeholder="Lead with the most recent role. Stress team leadership. Drop the oldest job to one line.">'+esc(D('extra'))+'</textarea></label><div class="row"><button class="primary" data-act="tailor">'+(vers.length?'Write another version':'Write tailored resume')+'</button><label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="remember" data-chg="remember"'+(S.ui.draft.remember?' checked':'')+' style="width:16px;height:16px">Remember this direction for every resume</label></div></div>';
+ if(!rec)return h+'<div class="card"><p class="lede">No version for this job yet. The writer uses '+usableFacts().length+' active facts, '+standing().length+' standing instructions and '+learned().filter(m=>m.on!==false).length+' learned lessons.</p></div></div>';
+ h+='<div class="card"><h2>'+vers.length+' version'+(vers.length>1?'s':'')+' for this job</h2><p class="small">Every write, revise and copy is kept. Mark the one you submit as sent: it locks, so you always know exactly what the employer has.</p>'+vers.slice().reverse().map(v=>{const on=v.id===rec.id,pc=job.analysis?scoreText(job,resumeText(v.resume)).pct:null;return '<div class="item ver'+(on?' on':'')+'"><div class="row"><span class="vlabel" contenteditable="true" data-edit="verLabel" data-id="'+v.id+'" aria-label="Version name">'+esc(v.label)+'</span>'+(pc===null?'':'<span class="chip '+(pc>=75?'hit':pc>=55?'have':'miss')+'">'+pc+'%</span>')+(v.sentAt?'<span class="chip acc">sent '+esc(new Date(v.sentAt).toLocaleDateString([], {month:'short',day:'numeric'}))+'</span>':'')+(v.orig?'<span class="chip have">edited</span>':'')+'<span class="chip">'+esc(tplOf(v).name)+'</span></div><div class="small">'+esc(({revised:'Revised from '+(v.from||'earlier version'),copy:'Copy of '+(v.from||'earlier version'),reused:'Adapted from '+(v.from||'another job')})[v.kind]||'Written from fact base')+' · '+esc(shortDate(v.createdAt))+(v.extra?' · direction: '+esc(v.extra.slice(0,90)):'')+'</div><div class="row">'+(on?'<span class="small">Open below</span>':'<button data-act="openVer" data-id="'+v.id+'">Open</button><button data-act="cmpVer" data-id="'+v.id+'">Compare with open</button>')+'<button data-act="dupVer" data-id="'+v.id+'">Duplicate</button><button data-act="markSent" data-id="'+v.id+'">'+(v.sentAt?'Unmark sent':'Mark as sent')+'</button><button class="quiet danger" data-act="delVer" data-id="'+v.id+'" data-confirm="Delete '+(v.sentAt?'this SENT version':'this version')+'?">Delete</button></div></div>'}).join('')+'</div>';
+ const cmp=vers.find(v=>v.id===S.ui.cmpId&&v.id!==rec.id);
+ if(cmp){const d=diffLines(resumeText(cmp.resume),resumeText(rec.resume)),add=d.filter(x=>x.t==='+').length,del=d.filter(x=>x.t==='-').length;const pa=job.analysis?scoreText(job,resumeText(cmp.resume)).pct:0,pb=job.analysis?scoreText(job,resumeText(rec.resume)).pct:0;
+  h+='<div class="card"><div class="row"><h2 style="margin-right:auto">'+esc(cmp.label)+' compared with '+esc(rec.label)+'</h2><button data-act="closeCmp">Close</button></div><p class="small">'+del+' lines only in '+esc(cmp.label)+' (struck through), '+add+' lines only in '+esc(rec.label)+'. Keyword match '+pa+'% against '+pb+'%.</p><div class="diff">'+(add+del?d.filter(x=>x.t!=='='||(x.s===x.s.toUpperCase()&&x.s.length<40)).map(x=>'<div class="'+(x.t==='+'?'add':x.t==='-'?'del':'ctx')+'">'+(x.t==='='?'':x.t+' ')+esc(x.s)+'</div>').join(''):'<div class="ctx">The text of these two versions is identical.</div>')+'</div></div>'}
+ const r=rec.resume,flags=flagsFor(r),sc=scoreText(job,resumeText(r)),ev=allEvidence(),checks=atsChecks(r,flags);const numFlags=flags.filter(f=>f.nums.length),noSrc=flags.filter(f=>f.nosrc);const cur=TPL[rec.tpl]?rec.tpl:(TPL[S.profile.tpl]?S.profile.tpl:'classic');
+ h+='<div class="split"><div class="stack"><div class="card"><div class="row"><h2 style="margin-right:auto">'+esc(rec.label)+' for '+esc(job.company||job.title||'job')+'</h2><button data-act="export" data-id="docx">DOCX</button><button data-act="export" data-id="pdf">PDF</button><button data-act="export" data-id="txt">TXT</button><button data-act="export" data-id="copy">Copy text</button></div><label>Template<select id="tpl" data-chg="pickTpl">'+Object.keys(TPL).map(k=>'<option value="'+k+'"'+(k===cur?' selected':'')+'>'+TPL[k].name+': '+TPL[k].note+'</option>').join('')+'</select></label>'+(rec.sentAt?'<div class="banner">Marked as sent on '+esc(new Date(rec.sentAt).toLocaleDateString())+' and locked. Duplicate it to keep editing.</div>':'<p class="small">Tap any line to edit it. Scores update when you leave the line. Red lines need your eye before sending.'+(rec.orig?' This version has your edits. <button class="quiet" data-act="resetEdits" data-id="'+rec.id+'" data-confirm="Discard your edits?">Undo all edits</button>':'')+'</p>')+'<div class="sheetbox">'+vSheet(rec,flags)+'</div></div></div>';
+ h+='<div class="stack"><div class="card"><h3>Keyword match</h3><div class="meter"><span class="num '+(sc.pct>=75?'good':sc.pct>=55?'warn':'bad')+'">'+sc.pct+'%</span><div class="bar"><span style="width:'+sc.pct+'%"></span></div></div><p class="small">Weighted share of the posting’s '+sc.total+' screening terms that appear in this version. A guide to coverage, not a prediction from any specific ATS.</p>'+(sc.miss.length?'<h3>Missing</h3><div class="chips">'+sc.miss.map(k=>'<span class="chip '+(kwHit(ev,k)?'have':'miss')+'">'+esc(k.term)+'</span>').join('')+'</div><p class="small">Amber: your facts support it, so work it in. Red: no evidence in your fact base, so it stays out until you add a fact.</p>':'')+((sc.miss.some(k=>kwHit(ev,k))||numFlags.length)?'<div class="row"><button class="primary" data-act="revise">Revise: add supported terms, fix flagged numbers</button></div>':'')+'<h3>Covered</h3><div class="chips">'+sc.hit.map(k=>'<span class="chip hit">'+esc(k.term)+'</span>').join('')+'</div></div>';
+ h+='<div class="card"><h3>Checks</h3><div class="checks">'+checks.map(c=>'<div><b class="'+(c.ok?'good':'bad')+'">'+(c.ok?'PASS':'FIX')+'</b><span>'+esc(c.label)+'</span></div>').join('')+'</div>'+(numFlags.length?'<h3 class="bad">Numbers to verify</h3>'+numFlags.map(f=>'<p class="small"><span class="mono bad">'+esc(f.nums.join(', '))+'</span> in: '+esc(f.text.slice(0,110))+'</p>').join(''):'')+(noSrc.length?'<p class="small">'+noSrc.length+' lines cite no fact. Read them against your record.</p>':'')+'</div>';
+ if((r.gaps||[]).length)h+='<div class="card"><h3>Gaps the writer left out</h3>'+r.gaps.map(g=>'<p class="small"><b>'+esc(g.requirement)+'</b> '+esc(g.note||'')+'</p>').join('')+'<div class="row"><button data-act="go" data-id="interview">Close gaps in the interview</button></div></div>';
+ if(r.notes)h+='<div class="card"><h3>Positioning angle</h3><p class="small">'+esc(r.notes)+'</p></div>';
+ return h+'</div></div></div>'}
+function vInterview(){const iv=S.ui.iv;let h='<div class="stack"><div class="card"><h2>Intake interview</h2><p class="lede">The engine reads your fact base, finds what a strong resume still needs, and asks for it. Your answers become facts. Answer only with what is true; skip any question you cannot answer exactly.</p><div class="grid2"><label>Aim questions at a job (optional)<select id="ivJob" data-draft="ivJob"><option value="">General strengthening</option>'+S.jobs.map(j=>'<option value="'+j.id+'"'+(D('ivJob')===j.id?' selected':'')+'>'+esc((j.title||'Untitled')+(j.company?' · '+j.company:''))+'</option>').join('')+'</select></label></div><div class="row"><button class="'+(iv?'':'primary')+'" data-act="genQuestions">'+(iv?'Ask a new set':'Ask me 7 questions')+'</button></div></div>';
+ if(iv)h+='<div class="card">'+iv.qs.map((x,i)=>'<div class="item"><h3>'+esc(x.q)+'</h3><p class="small">'+esc([x.title,x.company].filter(Boolean).join(' at '))+(x.why?' · '+esc(x.why):'')+'</p><textarea id="iva'+i+'" data-draft="iva'+i+'" style="min-height:70px" aria-label="Answer '+(i+1)+'">'+esc(D('iva'+i))+'</textarea></div>').join('')+'<div class="row"><button class="primary" data-act="saveAnswers">Save answers as facts</button></div></div>';
+ return h+'</div>'}
+function vMemory(){const ls=learned().slice().sort((a,b)=>(b.on!==false)-(a.on!==false)||b.strength-a.strength),sig=signalCount(),st=statGroups(),pairs=editPairs().length;
+ let h='<div class="stack"><div class="card"><h2>What the engine has learned</h2><p class="lede">It watches two things: the lines you rewrite by hand, and how each sent resume did. Lessons that keep proving out get stronger; ones your results contradict fade and drop off. You can switch any lesson off.</p>'+(sig?'<div class="banner">'+sig+' new signal'+(sig>1?'s':'')+' since the last update.</div>':'')+'<div class="row"><button class="primary" data-act="learn">Update learning</button><span class="small">Reading '+pairs+' hand edit'+(pairs===1?'':'s')+' and '+st.n+' recorded outcome'+(st.n===1?'':'s')+'.</span></div>'+(S.profile.learnNote?'<p class="small">Last update: '+esc(S.profile.learnNote)+'</p>':'')
+  +(ls.length?ls.map(m=>'<div class="fact'+(m.on===false?' off':'')+'"><input type="checkbox" id="ls-'+m.id+'" aria-label="Use this lesson" data-chg="lessonOn" data-id="'+m.id+'"'+(m.on!==false?' checked':'')+'><div><div class="ftext">'+esc(m.text)+'</div><div class="chips" style="margin-top:4px"><span class="chip '+(m.dir==='avoid'?'miss':'hit')+'">'+(m.dir==='avoid'?'do less':'do more')+'</span><span class="chip acc">strength '+m.strength+' of 5'+(m.was&&m.was!==m.strength?(m.strength>m.was?' ▲ from ':' ▼ from ')+m.was:'')+'</span><span class="chip">from '+esc(m.basis==='both'?'edits and results':m.basis==='outcomes'?'results':'edits')+'</span></div>'+(m.evidence?'<div class="small" style="margin-top:3px">'+esc(m.evidence)+'</div>':'')+'</div><button class="quiet danger" data-act="delLesson" data-id="'+m.id+'" aria-label="Drop lesson for good">×</button></div>').join(''):'<p class="small">No lessons yet. Your recent hand edits already shape the next resume; lessons appear after the first update.</p>')+'</div>';
+ h+='<div class="card"><h2>Results so far</h2><p class="lede">'+st.sent+' version'+(st.sent===1?'':'s')+' marked as sent, '+st.n+' with a recorded outcome. Record outcomes with the status menu on the Jobs tab.</p>'+(st.n?st.groups.filter(g=>g.rows.length).map(g=>'<div class="item"><h3>'+g.name+'</h3><div class="checks">'+g.rows.map(r=>'<div><b class="mono">'+r[1][0]+' of '+r[1][1]+'</b><span>'+esc(r[0])+' · reached interview or offer</span></div>').join('')+'</div></div>').join('')+(st.n<5?'<p class="small">Under 5 outcomes: read these as anecdotes. Hiring results depend on far more than the resume.</p>':''):'')+'</div>';
+ h+='<div class="card"><h2>Standing instructions</h2><p class="lede">Rules you set yourself, applied to every resume: target titles, phrases to use or avoid, what to lead with. The truth rules always win over anything here.</p><label>New instruction<textarea id="memText" data-draft="memText" style="min-height:64px" placeholder="Never use the word spearheaded. Describe my freelance years as a consultancy with named clients.">'+esc(D('memText'))+'</textarea></label><div class="row"><button class="primary" data-act="addMem">Remember this</button></div>'+standing().map(m=>'<div class="fact" style="grid-template-columns:1fr auto"><div class="ftext" contenteditable="true" data-edit="mem" data-id="'+m.id+'">'+esc(m.text)+'</div><button class="quiet danger" data-act="delMem" data-id="'+m.id+'" aria-label="Forget">×</button></div>').join('')+'</div>';
+ return h+'<div class="card"><h2>Always on</h2><div class="checks"><div><b class="good">RULE</b><span>Only facts in your fact base may appear. Nothing is inferred or invented.</span></div><div><b class="good">RULE</b><span>A number appears only if the cited fact contains that exact number. Anything else is flagged red.</span></div><div><b class="good">RULE</b><span>Company names, titles and dates are copied from your roles, never rewritten.</span></div><div><b class="good">RULE</b><span>Requirements you cannot evidence are listed as gaps instead of being written in.</span></div><div><b class="good">RULE</b><span>Learning changes how things are written, never what is claimed.</span></div></div></div></div>'}
+function vData(){const cloud=Store.mode==='cloud',imp=S.ui.imp;return '<div class="stack"><div class="card"><h2>Your data</h2><p class="lede">'+(cloud?'Saved privately to your account on this page. Nobody else who opens this page can read it, including the person who shared it with you.':'Saved in this browser only. It will not follow you to another device and clearing browser data removes it, so download a backup after each session.')+'</p><div class="row"><button class="primary" data-act="exportBackup">Download backup</button><label style="flex-direction:row;align-items:center;gap:8px">Restore from backup<input type="file" id="importFile" data-chg="importFile" accept=".json" style="width:auto"></label></div>'+(imp?'<div class="banner">This backup holds '+(imp.facts||[]).length+' facts, '+(imp.jobs||[]).length+' jobs and '+(imp.resumes||[]).length+' versions. Restoring replaces everything here now.<div class="row" style="margin-top:8px"><button data-act="confirmImport">Replace my data with this backup</button><button class="quiet" data-act="cancelImport">Cancel</button></div></div>':'')+'<div class="row"><button class="quiet danger" data-act="wipe" data-confirm="Delete all sources, facts, jobs and versions?">Delete everything</button></div></div>'
+ +'<div class="card"><h2>How it works</h2><div class="checks"><div><b>1</b><span>Sources are split into facts. Long documents are read in parts so nothing is skipped.</span></div><div><b>2</b><span>You review the facts. Only ticked facts can be used.</span></div><div><b>3</b><span>Each posting is turned into a weighted list of the terms a screen would search for.</span></div><div><b>4</b><span>The writer builds a resume for that posting from your facts only, then the page checks every number against the facts it cites.</span></div><div><b>5</b><span>Mark what you send and record how it went. The engine turns your edits and results into weighted lessons for the next resume.</span></div></div></div>'
+ +'<div class="card"><h2>Sharing with friends</h2><p class="lede">Share this page from its menu in Claude. Each person signs in with their own Claude account, keeps their own separate fact base, and spends their own Claude usage when they extract, analyze or write. Writing one resume is one long request; extraction is one request per part of the document.</p><p class="small">The keyword score measures coverage of the posting\u2019s terms. It is a writing guide. No tool can see how a specific employer\u2019s system ranks applicants.</p></div></div>'}
+function route(){const h=location.hash.replace('#','');return TABS.some(t=>t[0]===h)?h:'sources'}
+function render(){if(!S.ready)return;const r=route();$('#tabs').innerHTML=TABS.map((t,i)=>'<a href="#'+t[0]+'"'+(t[0]===r?' aria-current="page"':'')+'><i>'+(i+1)+'</i>'+t[1]+'</a>').join('');$('#counts').innerHTML='<span><b>'+S.sources.length+'</b> sources</span><span><b>'+S.facts.length+'</b> facts</span><span><b>'+S.jobs.length+'</b> jobs</span><span><b>'+S.resumes.length+'</b> versions</span>';$('#storeNote').textContent=Store.mode==='cloud'?'saved privately to your account':'saved in this browser only \u00b7 back up in Data';
+ const y=window.scrollY;$('#view').innerHTML=({sources:vSources,interview:vInterview,facts:vFacts,jobs:vJobs,tailor:vTailor,memory:vMemory,data:vData})[r]();if(render.last===r)window.scrollTo(0,y);render.last=r}
+
+/* ---------- events ---------- */
+let armed=null;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id;
+ if(b.dataset.confirm&&armed!==b){armed=b;b.dataset.label=b.textContent;b.textContent=b.dataset.confirm+' Tap again';setTimeout(()=>{if(armed===b){armed=null;if(b.isConnected)b.textContent=b.dataset.label}},3500);return}armed=null;
+ if(a==='stop'){if(ctl)ctl.abort();return}if(S.busy)return;
+ const acts={addSource,reExtract:()=>reExtract(id),delSource:()=>delSource(id),addJob,analyzeJob:()=>analyzeJob(id),delJob:()=>delJob(id),tailor:()=>tailor(),revise:()=>tailor('revise'),learn,delLesson:()=>{const m=S.memory.find(x=>x.id===id);if(m){S.profile.dropped=(S.profile.dropped||[]).concat(m.text).slice(-20);Store.state('profile')}S.memory=S.memory.filter(x=>x.id!==id);Store.state('memory');render()},genQuestions,saveAnswers,export:()=>exportAs(id),exportBackup,confirmImport:()=>{Store.replaceAll(S.ui.imp);S.ui.imp=null;render();toast('Backup restored')},cancelImport:()=>{S.ui.imp=null;render()},wipe:()=>{Store.replaceAll({});render();toast('Everything deleted')},
+  sync:async()=>{$('#syncBtn').disabled=true;await Store.load();$('#syncBtn').disabled=false;render();toast('Data reloaded')},
+  go:()=>{e.preventDefault();location.hash=id},openTailor:()=>{S.ui.jobId=id;S.ui.resId=null;location.hash='tailor';render()},
+  delVer:()=>{S.resumes=S.resumes.filter(r=>r.id!==id);Store.remove('resumes',id);if(S.ui.resId===id)S.ui.resId=null;render()},
+  openVer:()=>{S.ui.resId=id;render()},cmpVer:()=>{S.ui.cmpId=id;render()},closeCmp:()=>{S.ui.cmpId=null;render()},
+  dupVer:()=>{const v=S.resumes.find(r=>r.id===id);if(!v)return;const n=nextN(v.jobId);const c={id:uid('v'),jobId:v.jobId,n,label:'v'+n,createdAt:Date.now(),extra:v.extra||'',resume:clone(v.resume),tpl:v.tpl,kind:'copy',from:v.label};S.resumes.push(c);Store.item('resumes',c);S.ui.resId=c.id;render();toast(c.label+' created as a copy of '+v.label)},
+  markSent:()=>{const v=S.resumes.find(r=>r.id===id);if(!v)return;if(v.sentAt)delete v.sentAt;else{v.sentAt=Date.now();const j=S.jobs.find(x=>x.id===v.jobId);if(j&&j.status==='Saved'){j.status='Applied';j.statusAt=Date.now();Store.item('jobs',j)}}Store.item('resumes',v);render()},
+  resetEdits:()=>{const v=S.resumes.find(r=>r.id===id);if(v&&v.orig){v.resume=v.orig;delete v.orig;delete v.editedAt;Store.item('resumes',v);render()}},
+  addRole:()=>{S.roles.push({id:uid('r'),company:'New company',title:'Title',location:'',start:'',end:'Present'});Store.state('roles');render()},
+  delRole:()=>{S.roles=S.roles.filter(r=>r.id!==id);S.facts=S.facts.filter(f=>f.roleId!==id);Store.state('roles');Store.state('facts');render()},
+  addFact:()=>{const f={id:uid('f'),kind:id?'achievement':'skill',text:'New fact: replace this text',roleId:id||'',tags:[],src:'manual',ok:true};S.facts.push(f);Store.state('facts');render();const el=document.querySelector('[data-edit="fact"][data-id="'+f.id+'"]');if(el){el.focus();try{document.getSelection().selectAllChildren(el)}catch(x){}}},
+  delFact:()=>{S.facts=S.facts.filter(f=>f.id!==id);Store.state('facts');render()},
+  addMem:()=>{const t=D('memText').trim();if(!t)return;S.memory.push({id:uid('m'),text:t});S.ui.draft.memText='';Store.state('memory');render()},
+  delMem:()=>{S.memory=S.memory.filter(m=>m.id!==id);Store.state('memory');render()}};
+ if(acts[a])acts[a]()});
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.draft)S.ui.draft[t.dataset.draft]=t.value;if(t.dataset&&t.dataset.input==='q'){S.ui.q=t.value;clearTimeout(render.q);render.q=setTimeout(()=>{render();const el=$('#factQ');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}},350)}});
+document.addEventListener('change',e=>{const t=e.target,c=t.dataset&&t.dataset.chg;if(!c)return;const id=t.dataset.id,k=t.dataset.k;
+ if(c==='profile'){S.profile[k]=k==='links'?t.value.split(',').map(s=>s.trim()).filter(Boolean):t.value.trim();Store.state('profile')}
+ else if(c==='role'){const r=S.roles.find(x=>x.id===id);if(r){r[k]=t.value.trim();Store.state('roles')}}
+ else if(c==='factOk'){const f=S.facts.find(x=>x.id===id);if(f){f.ok=t.checked;Store.state('facts');t.closest('.fact').classList.toggle('off',!t.checked)}}
+ else if(c==='factKind'||c==='factRole'){const f=S.facts.find(x=>x.id===id);if(f){if(c==='factKind')f.kind=t.value;else f.roleId=t.value;Store.state('facts');render()}}
+ else if(c==='mergeRole'){const from=S.roles.find(x=>x.id===id),to=S.roles.find(x=>x.id===t.value);if(from&&to){for(const f of S.facts)if(f.roleId===from.id)f.roleId=to.id;for(const k of ['location','start','end'])if(!to[k]&&from[k])to[k]=from[k];S.roles=S.roles.filter(x=>x!==from);Store.state('roles');Store.state('facts');render();toast('Merged into '+to.title+' at '+to.company)}}
+ else if(c==='importFile'){if(t.files[0])readImport(t.files[0])}
+ else if(c==='jobStatus'){const j=S.jobs.find(x=>x.id===id);if(j){j.status=t.value;j.statusAt=Date.now();Store.item('jobs',j)}}
+ else if(c==='lessonOn'){const m=S.memory.find(x=>x.id===id);if(m){m.on=t.checked;Store.state('memory');t.closest('.fact').classList.toggle('off',!t.checked)}}
+ else if(c==='pickBase'){render()}
+ else if(c==='pickJob'){S.ui.jobId=t.value;S.ui.resId=null;render()}
+ else if(c==='pickTpl'){const v=S.resumes.find(r=>r.id===S.ui.resId);if(v&&TPL[t.value]){v.tpl=t.value;S.profile.tpl=t.value;Store.item('resumes',v);Store.state('profile');render()}}
+ else if(c==='remember'){S.ui.draft.remember=t.checked}});
+document.addEventListener('focusout',e=>{const t=e.target,k=t.dataset&&t.dataset.edit;if(!k)return;const text=t.textContent.replace(/\s+/g,' ').trim();
+ if(k==='fact'){const f=S.facts.find(x=>x.id===t.dataset.id);if(f&&text&&f.text!==text){f.text=text;Store.state('facts')}}
+ else if(k==='mem'){const m=S.memory.find(x=>x.id===t.dataset.id);if(m&&text&&m.text!==text){m.text=text;Store.state('memory')}}
+ else if(k==='verLabel'){const v=S.resumes.find(r=>r.id===t.dataset.id);if(v&&text&&v.label!==text){v.label=text.slice(0,40);Store.item('resumes',v);render()}else if(v&&!text)t.textContent=v.label}
+ else if(k==='res'){const rec=S.resumes.find(r=>r.id===S.ui.resId);if(!rec||rec.sentAt)return;const r=rec.resume,before=clone(r),p=t.dataset.path.split('.');let cur;
+  if(p[0]==='headline'||p[0]==='summary'){cur=r[p[0]];r[p[0]]=text}
+  else if(p[0]==='skills'){cur=(r.skills[p[1]].items||[]).join(', ');r.skills[p[1]].items=text.split(',').map(s=>s.trim()).filter(Boolean)}
+  else if(p[0]==='experience'){cur=r.experience[p[1]].bullets[p[2]].text;if(text)r.experience[p[1]].bullets[p[2]].text=text;else r.experience[p[1]].bullets.splice(p[2],1)}
+  else{cur=r[p[0]][p[1]].text;if(text)r[p[0]][p[1]].text=text;else r[p[0]].splice(p[1],1)}
+  if(cur!==text){if(!rec.orig)rec.orig=before;rec.editedAt=Date.now();Store.item('resumes',rec);render()}}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.edit){e.preventDefault();e.target.blur()}});
+window.addEventListener('hashchange',render);
+window.__re={S,Store,chunks,snapshot,TPL,tplOf,blocks,diffLines,editPairs,outcomes,signalCount,statGroups,learned,standing,render,scoreText,flagsFor,resumeText,mergeExtraction,buildDocx,buildPdf,hasTerm,unverifiedNums,dateKey,atsChecks};
+Store.init().then(()=>{S.ready=true;render();if(Store.inboxed)toast(Store.inboxed+' item'+(Store.inboxed>1?'s':'')+' loaded by Claude from chat')});
+</script>
+</body>
+</html>
