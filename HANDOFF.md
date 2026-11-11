@@ -2,7 +2,7 @@
 
 Updated at the end of each build cycle so work can resume without rereading the whole history.
 
-## State: v0.11.0 (11 Nov 2026)
+## State: v0.12.0 (11 Nov 2026)
 
 Everything below is on `main` and published to the inside-Claude copy.
 
@@ -17,6 +17,10 @@ Everything below is on `main` and published to the inside-Claude copy.
 
 - Interview prep tab (v0.11): story bank themes, interview-only stories, rounds, likely questions matched to stories, timed practice with feedback, introduction draft, research notes, debrief, thank-you drafts. See docs/INTERVIEW-PREP.md.
 - Wins: AI may suggest tighter wording, accepted part by part with the user's tap; targets are 2 to 3 wins per role.
+
+- v0.12: users can add their own story themes; interview debriefs feed the learning loop as approved, interview-scope lessons that shape later prep packs (never resumes).
+- A go-to-market readiness analysis exists as a private Claude doc (not in this public repo). Its verdict: not ready for outside testers until the owner's real run passes. First-tier gaps: real-model check, first-run guide, a home plus key setup guide (or the inside-Claude route), terms and privacy note, backup reminder and persistent storage, pasted text treated as data, a private feedback channel.
+- Spoken mock interviews are approved as essential but not built: waiting on the owner's decision about where speech is processed.
 
 ## Not yet proven
 

@@ -60,5 +60,17 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  ok(pr.rounds[0].debrief.owed==='A reference'&&prompts[prompts.length-1].includes('WHAT I OWE THEM: A reference')&&d.body.textContent.includes('send it yourself'),'the debrief is saved and feeds a thank-you draft the user sends themselves');
  click('[data-act=copyThanks][data-id="'+rid+'"]');await wait(30);ok(clip.includes('reference I promised'),'the thank-you draft can be copied');
  click('[data-act=roundDone][data-id="'+rid+'"]');ok(pr.rounds[0].done&&S.jobs[0].status==='Interview','marking a round done moves the job to Interview');
+ // custom themes
+ w.location.hash='wins';await wait(30);R.render();click('[data-act=editWin][data-id=w1]');type('#w_newTheme','Negotiation');click('[data-act=addTheme]');click('[data-act=saveWin]');
+ w.location.hash='prep';await wait(30);R.render();ok(S.profile.themes.join()==='Negotiation'&&R.wins().find(x=>x.id==='w1').themes.includes('Negotiation')&&[...d.querySelectorAll('.chip.hit')].some(c=>c.textContent==='Negotiation 1'),'a user can add their own theme and it joins the story bank');
+ // debriefs feed learning, as a proposal, and interview lessons shape the next pack
+ ok(R.signalCount()>=1,'a debrief counts as a new signal for learning');
+ const orig=w.fetch;w.fetch=async(u,o)=>{const p=JSON.parse(o.body).messages[0].content;prompts.push(p);const out=p.startsWith('You maintain')?{lessons:[{id:'',text:'Lead with the distribution story when asked about growth.',dir:'do',strength:3,basis:'debriefs',scope:'interview',evidence:'1 debrief'}],summary:'One interview lesson.'}:{questions:[],ask:[],research:[]};return{ok:true,headers:{get:()=>'application/json'},json:async()=>({choices:[{message:{content:JSON.stringify(out)},finish_reason:'stop'}]})}};
+ w.location.hash='memory';await wait(30);R.render();click('[data-act=learn]');await wait(200);const lp=prompts[prompts.length-1];
+ ok(lp.includes('INTERVIEW DEBRIEFS (1)')&&lp.includes('How I opened distribution')&&R.learned().length===0,'debrief notes reach the learning request and the result is only a proposal');
+ tap(w,d.querySelector('[data-act=approveLessons]'));ok(R.learned()[0].scope==='interview'&&d.body.textContent.includes('for interview prep'),'an approved interview lesson is kept and labelled');
+ w.location.hash='prep';await wait(30);R.render();click('[data-act=buildPack]');await wait(200);const p2=prompts[prompts.length-1];
+ ok(p2.includes('LESSONS FROM THIS CANDIDATE\'S PAST INTERVIEWS')&&p2.includes('Lead with the distribution story')&&p2.includes('QUESTIONS THIS CANDIDATE REPORTS BEING ASKED BEFORE')&&p2.includes('Negotiation'),'the next prep pack uses interview lessons, questions asked before and custom themes');
+ w.fetch=orig;S.ui.jobId='j1';w.location.hash='tailor';await wait(30);R.render();click('[data-act=tailor]');await wait(200);ok(!prompts[prompts.length-1].includes('Lead with the distribution story'),'interview lessons stay out of the resume writer');
  ok(prompts.every(x=>x.includes('never use an em dash')),'every prep request carries the house writing rule');
  await wait(200);w.close()})().catch(e=>{console.error('FAIL',e);process.exit(1)});

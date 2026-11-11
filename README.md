@@ -45,12 +45,12 @@ A win is stored as one complete fact, so the number checks, backups, dash scan a
 
 The concern that started this: a resume alone does not capture the accomplishments and accolades a candidate needs in the room. Wins fix the capture; Interview prep puts them to use. The approach and its sources are in [docs/INTERVIEW-PREP.md](docs/INTERVIEW-PREP.md).
 
-- **Story bank.** Each win can be tagged with the interview themes it answers (leadership, results, conflict, failure and so on). The bank shows which themes have no story. Stories about setbacks or disagreements can be marked interview-only, which keeps them off every resume.
+- **Story bank.** Each win can be tagged with the interview themes it answers (leadership, results, conflict, failure and so on), plus themes you add yourself. The bank shows which themes have no story. Stories about setbacks or disagreements can be marked interview-only, which keeps them off every resume.
 - **Rounds.** Log each interview by stage. Each stage says what it is for and how to prepare.
 - **Likely questions.** For a posting and stage, the AI predicts 12 to 14 questions, matches each to stories you already have, and leaves it unmatched when none fits. The app discards any story reference it cannot find. Unmatched questions are your gaps.
 - **Practice.** Answer out loud against a clock, with your story hidden until you ask for it. Optional feedback says which STAR parts were missing. It does not rewrite your answer.
 - **Tell me about yourself.** Write it yourself, or approve a draft built only from your facts in the present, past, future shape. The app checks the draft's numbers against your facts and shows the spoken length.
-- **After each round.** A debrief captures what was asked and what you owe, and feeds a thank-you draft that you read, edit and send yourself.
+- **After each round.** A debrief captures what was asked and what you owe, and feeds a thank-you draft that you read, edit and send yourself. Debriefs also feed the learning loop: approved interview lessons and the questions you were actually asked shape later prep packs.
 
 Every AI output here is a proposal or advice. Drafts are accepted only by your own tap.
 
