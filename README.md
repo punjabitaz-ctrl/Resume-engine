@@ -26,6 +26,18 @@ It is one HTML file plus four bundled libraries. There is no server and nothing 
 
 The keyword match is a coverage measure of the posting's terms. It is a writing guide, not a prediction of how any employer's system ranks applicants.
 
+## How repair works
+
+When a step fails, the app does not just show an error. A repair panel appears with the likely cause and one or more fixes. Nothing is changed until you pick one.
+
+- **Known failures** are diagnosed without any AI call: unreachable server, rejected key, rate limit, an answer cut short, an answer that cannot be read as data, a request that is too large.
+- **Unknown failures** can be sent to your AI engine for analysis. It sees the failure record, your settings and the data check, and must choose from a fixed list of fixes. Anything outside that list is refused.
+- **Fixes** are a fixed, safe set: retry, wait and retry, read documents in smaller parts, let the AI repair unreadable answers, turn off streaming, send only the most relevant facts, repair saved data, open Setup, or draft a problem report. Each approved fix is logged in Setup and can be reset.
+- **Saved data** has its own health check. It finds damage such as unreadable items, facts pointing at deleted roles, or versions for deleted jobs. A repair takes a restore point first and can be undone.
+- **A screen that cannot draw** shows a recovery card with the health check and a backup button instead of a blank page.
+
+The repair assistant cannot rewrite the app's own code. A defect in the app ends in a drafted problem report for the maintainer.
+
 ## How learning works
 
 Two signals are captured as you work, at no cost:
@@ -106,7 +118,7 @@ npm install
 npm test
 ```
 
-The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, and bring-your-own-key and local-model modes (`tests/byo.js`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
+The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), and the repair system (`tests/heal.js`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
 
 ## Bundled libraries
 

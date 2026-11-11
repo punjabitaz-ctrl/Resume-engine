@@ -2,9 +2,9 @@
 
 Resume Engine starts as one job: turn a fact base into a tailored resume. The direction is a system that manages a whole job search. This file is the working plan; phases ship in order and each one has to earn the next.
 
-## Phase 1: Resume engine (shipped, v0.6)
+## Phase 1: Resume engine (shipped, v0.7)
 
-Fact base, intake interview, job analysis, tailored writing with truth checks, templates, versions, learning from edits and results, backup, tester problem reports.
+Fact base, intake interview, job analysis, tailored writing with truth checks, templates, versions, learning from edits and results, backup, tester problem reports, bring-your-own AI engine, and repair with user approval.
 
 ## Phase 2: Pipeline tracker
 
