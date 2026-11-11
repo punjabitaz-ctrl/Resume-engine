@@ -33,6 +33,7 @@ const EXTRACT={profile:{name:'Sample Person',email:'s@example.com',phone:'555-01
  S.jobs=[{id:'j1',company:'ExampleCo',title:'Channel Partnerships Manager',jdText:'x',status:'Saved',addedAt:1,analysis:{keywords:[{term:'search engine optimization',variants:['SEO'],weight:2},{term:'Salesforce',weight:1}]}}];
  S.ui.jobId='j1';w.location.hash='tailor';await wait(30);R.render();click('[data-act=tailor]');await wait(200);
  const wp=prompts[prompts.length-1];
+ ok(prompts.length>=2&&prompts.every(x=>x.includes('WRITING RULE FOR ALL TEXT IN YOUR ANSWER: never use an em dash')),'the no-long-dash rule rides on every request the app makes, not only resume writing');
  ok(wp.includes('Never use an em dash')&&wp.includes('recruiters search it by job title')&&wp.includes('spearheaded'),'the writer is told the human-voice and search rules up front');
  ok(!wp.includes('visionary')&&!wp.includes('Signed 15'),'unapproved facts are never sent to the writer');
  ok(R.roleDates(S.roles[0])==='Jan 2026 - Present','date ranges use a plain hyphen');

@@ -155,7 +155,7 @@ const S={profile:{},roles:[],facts:[],memory:[],sources:[],jobs:[],resumes:[],ui
 const TABS=[['sources','Sources'],['interview','Interview'],['facts','Fact base'],['jobs','Jobs'],['tailor','Tailor'],['memory','Memory'],['data','Setup']];
 const KINDS=['achievement','responsibility','skill','project','education','certification','award','summary','other'];
 const STATUSES=['Saved','Applied','Interview','Offer','Rejected','No response'];
-const APP_VERSION='0.9.0';
+const APP_VERSION='0.9.1';
 const IN_CLAUDE=!!(window.claude&&window.claude.use);
 const REPO='https://github.com/punjabitaz-ctrl/Resume-engine';
 const errs=[];function logErr(where,e){errs.push({at:new Date().toISOString(),where:String(where),code:String((e&&e.code)||''),msg:String((e&&e.message)||'').slice(0,200)});if(errs.length>8)errs.shift()}
@@ -282,7 +282,9 @@ const AI={cfg:{preset:'',api:'openai',baseUrl:'',model:'',remember:true,chunk:14
 function parseJSON(t){t=String(t).replace(/<think>[\s\S]*?<\/think>/g,'').trim();const tries=[t],f=t.match(/```(?:json)?\s*([\s\S]*?)```/);if(f)tries.push(f[1]);const a=t.search(/[\[{]/),b=Math.max(t.lastIndexOf('}'),t.lastIndexOf(']'));if(a>=0&&b>a)tries.push(t.slice(a,b+1));for(const x of tries){try{return JSON.parse(x)}catch(e){}}throw{code:'invalid_json'}}
 function localRepair(t){try{return parseJSON(String(t).replace(/,\s*([}\]])/g,'$1'))}catch(e){return undefined}}
 async function mend(raw,cutShort,ask){if(!cutShort){if(S.ui.tidyOnce){const v=localRepair(raw);if(v!==undefined)return v}if(S.ui.repairOnce){const t=await ask('The text below was meant to be a single valid JSON value but it is malformed. Return the corrected JSON only. Change nothing except what is needed to make it valid.\n\n'+String(raw).slice(0,60000));try{return parseJSON(t)}catch(e){}}}throw{code:'invalid_json',message:cutShort?'the answer was cut short':'the answer was not readable as data',text:String(raw),cut:!!cutShort}}
-async function askJSON(prompt,tier){const onText=({text})=>{if(S.busy){$('#busyText').textContent=S.busy+' · '+text.length+' characters written'}};
+/* Project-wide writing rule. It rides on every request the app makes, so it covers resumes today and cover letters, outreach and anything else added later. */
+const HOUSE_STYLE='\n\nWRITING RULE FOR ALL TEXT IN YOUR ANSWER: never use an em dash or an en dash. Use a comma, a period, or the word "to". Write plainly, the way a person would.';
+async function askJSON(prompt,tier){prompt+=HOUSE_STYLE;const onText=({text})=>{if(S.busy){$('#busyText').textContent=S.busy+' · '+text.length+' characters written'}};
  if(IN_CLAUDE){const s=await getSample();if(!s)throw{code:'unavailable'};try{return await s.json(prompt,{modelTier:tier||'default',cache:false,signal:ctl.signal,onText})}catch(e){if(!e||e.code!=='invalid_json'||!e.text)throw e;return mend(e.text,/cut short|length/i.test(e.message||''),async q=>(await s(q,{modelTier:'quick',cache:false,signal:ctl.signal})).text)}}
  if(!AI.ready())throw{code:'no_ai'};const r=await AI.complete(prompt+'\n\nReturn only the JSON value. No commentary and no code fences.',{signal:ctl.signal,onText});if(!r.truncated){try{return parseJSON(r.text)}catch(e){}}return mend(r.text,r.truncated,async q=>(await AI.complete(q,{signal:ctl.signal})).text)}
 function setBusy(l){S.busy=l;$('#busyText').textContent=l+' \u00b7 thinking'}

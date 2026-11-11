@@ -2,7 +2,7 @@
 
 Updated at the end of each build cycle so work can resume without rereading the whole history.
 
-## State: v0.9.0 (11 Nov 2026)
+## State: v0.9.1 (11 Nov 2026)
 
 Everything below is on `main` and published to the inside-Claude copy.
 
@@ -21,6 +21,7 @@ Everything below is on `main` and published to the inside-Claude copy.
 
 ## Waiting on the owner
 
+0. Fact-match threshold (three quarters of wording) stays as is until the first real run; tune it with the owner afterwards.
 1. First real run from his main PC with an Anthropic key: resume, LinkedIn text, 7-question interview, one posting.
 2. GitHub Pages stays off until that run passes without breakage.
 
@@ -36,5 +37,5 @@ Everything below is on `main` and published to the inside-Claude copy.
 - A human approves every AI decision. No bypass, ever.
 - No keys, accounts or model names in the code.
 - Nothing is written that the user's facts do not support. No invented numbers.
-- No em dashes or en dashes in resume text. Nothing is rewritten silently.
+- No em dashes or en dashes in anything the app writes, in every scenario (resumes now; cover letters, outreach and the rest when built). Nothing is rewritten silently.
 - Push to `main`. Update this file and project memory at the end of each cycle.

@@ -30,7 +30,7 @@ Read this first: most published advice on tracking systems comes from vendors an
 
 | Rule | Status | Why |
 | --- | --- | --- |
-| No em dashes or en dashes | project rule | Set by the project owner. Also a common tell of machine-written text |
+| No em dashes or en dashes, in anything the app writes | project rule | Set by the project owner for every scenario: resumes, extracted facts, interview questions, and cover letters and outreach when they are built. Enforced on every AI request. Also a common tell of machine-written text |
 | No filler or buzzwords | firm | Hiring-manager surveys name generic, repetitive and inflated language as the main giveaways |
 | Varied bullet openings and lengths | judgment | Uniform rhythm is one of the patterns reviewers describe |
 | Something specific in each bullet: a number, partner, product or place | firm | Vague description is a named giveaway, and specifics are what a reader remembers |
