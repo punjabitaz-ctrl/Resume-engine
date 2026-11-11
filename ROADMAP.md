@@ -2,7 +2,7 @@
 
 Resume Engine starts as one job: turn a fact base into a tailored resume. The direction is a system that manages a whole job search. This file is the working plan; phases ship in order and each one has to earn the next.
 
-## Phase 1: Resume engine (shipped, v0.5)
+## Phase 1: Resume engine (shipped, v0.6)
 
 Fact base, intake interview, job analysis, tailored writing with truth checks, templates, versions, learning from edits and results, backup, tester problem reports.
 
@@ -37,12 +37,15 @@ Starts after the first real intake run (resume, LinkedIn, interview) so Phase 1 
 - Negotiation notes and decision log
 - Search retrospective: what worked across the whole search
 
-## Platform decision (before Phase 3)
+## Platform (decided in v0.6)
 
-The artifact runtime keeps this simple and private, with real limits: no fetching of job links, no reminders or email, and synced storage only inside the owner's workspace. Phases 3 and later likely need a hosted app with accounts, a database and a server-side model key. That is a rewrite of storage and the Claude calls, not of the product logic, and should be decided on evidence from Phase 2 testers.
+The app is a static site where each user brings their own AI engine: an API key or a local model. Nothing is hard-coded and there is no server. It can still run inside Claude on the viewer's Claude account, but that is optional.
+
+Still open before Phase 3: fetching job links, reminders and email all need something beyond a static page (a small proxy, a browser extension, or a hosted backend). Decide on evidence from Phase 2 testers.
 
 ## Principles that do not change
 
 - Nothing is written that the user's own facts do not support
 - The user's data is theirs: private by default, exportable, deletable
+- No built-in keys or models: every user connects their own AI engine
 - Scores and learned lessons are guides with their evidence shown, never promises

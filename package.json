@@ -1,14 +1,15 @@
 {
   "name": "resume-engine",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "license": "AGPL-3.0-only",
   "description": "Browser app that turns a career fact base into job-specific, ATS-safe resumes. Runs as a Claude artifact.",
   "scripts": {
-    "test": "node tests/smoke.js && node tests/storage.js && node tests/versions.js && node tests/learning.js && node tests/feedback.js"
+    "test": "node tests/smoke.js && node tests/storage.js && node tests/versions.js && node tests/learning.js && node tests/feedback.js && node tests/byo.js"
   },
   "devDependencies": {
     "docx": "8.5.0",
+    "fake-indexeddb": "^6.2.8",
     "jsdom": "^25.0.0"
   }
 }

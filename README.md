@@ -2,7 +2,7 @@
 
 A browser app that builds a reusable fact base from your career material and writes a tailored, ATS-safe resume for each job posting.
 
-It runs as a Claude artifact: the page is one HTML file plus four bundled libraries, and it uses the artifact runtime for Claude calls, private per-person storage and file downloads.
+It is one HTML file plus four bundled libraries. There is no server and nothing is built in: every user connects their own AI engine, either an API key from a provider or a model running on their own computer. No keys, accounts or model names are hard-coded anywhere in this project.
 
 ## What it does
 
@@ -14,7 +14,7 @@ It runs as a Claude artifact: the page is one HTML file plus four bundled librar
 | Jobs | Paste a posting. Get a weighted keyword map, an evidence score against your facts, and a status tracker. |
 | Tailor | Writes a version per job. Keyword match, checks, gaps, four templates, DOCX / PDF / TXT export, version history, compare, mark as sent. |
 | Memory | Learned lessons (from your hand edits and results), results table, and your own standing instructions. |
-| Data | Backup, restore, delete everything, and a problem report testers can copy and send (no resume content in it). |
+| Setup | AI engine (your key or local model), backup, restore, delete everything, and a problem report testers can copy and send (no resume content or keys in it). |
 
 ## Rules the writer cannot break
 
@@ -37,7 +37,43 @@ Two signals are captured as you work, at no cost:
 
 ## Running it
 
-Publish `index.html` and `lib/` as a Claude artifact and declare these capabilities:
+### Standalone (bring your own key or local model)
+
+Serve the repository root as a static site. Any of these works:
+
+- GitHub Pages: repository Settings, Pages, deploy from the `main` branch root
+- Locally: `npx serve .` or `python3 -m http.server`, then open the address it prints
+
+Open the **Setup** tab and choose an AI engine:
+
+| Field | What to enter |
+| --- | --- |
+| Provider | A preset that fills in the address (Anthropic, OpenAI, OpenRouter, Google Gemini, Groq, Ollama, LM Studio), or "Another server" |
+| Request format | Anthropic, or OpenAI-compatible (most providers and local servers) |
+| API address | Editable. Any server that speaks one of the two formats |
+| Model | "Load models" asks the provider for its list. Or type the exact name |
+| API key | Leave empty for a local model |
+
+About keys:
+
+- The key is stored in your browser only and sent only to the address you entered.
+- It is never written to backups or problem reports, and never shown again in full.
+- "Remember the key on this device" off keeps it for the current tab session only.
+- Anyone with access to your browser profile can read a remembered key. Use a key with a spending limit.
+
+Local models:
+
+- **Ollama:** start it with `OLLAMA_ORIGINS` set to the address the app is served from, then pick the Ollama preset.
+- **LM Studio:** start the local server and enable CORS in its server settings.
+- Give the model a context window of at least 16,000 tokens. Smaller windows silently cut the request.
+- Small models often return malformed answers. The fact and number checks still run, but writing quality depends on the model you bring.
+- Some browsers (Safari) block calls from an https page to a local address. Serve the app locally in that case.
+
+Data is kept in the browser (IndexedDB). Use the Setup tab's backup to move it between devices.
+
+### Inside Claude (optional)
+
+The same file also runs as a Claude artifact. Pages inside Claude cannot reach outside services, so API keys and local models are unavailable there; that copy uses each viewer's own Claude account instead. Declare these capabilities:
 
 ```json
 {
@@ -51,19 +87,16 @@ Publish `index.html` and `lib/` as a Claude artifact and declare these capabilit
 }
 ```
 
-- Each signed-in person's data lives under their own `data/users/<id>/` subtree, private from everyone else.
-- People who cannot write to the artifact's database (anyone outside the owner's workspace) fall back to browser storage and should use the Data tab's backup.
-- The owner-only `inbox` collection lets a Claude chat session load job postings (`{kind:"job", company, title, url, jdText}`) or sources (`{kind:"source", title, type, text}`) into the app.
-- Opened as a plain file outside Claude, the page loads and stores data locally, but extraction, analysis and writing are unavailable because they need Claude.
+Each signed-in person's data lives under their own `data/users/<id>/` subtree. The owner-only `inbox` collection lets a Claude chat session load job postings (`{kind:"job", company, title, url, jdText}`) or sources (`{kind:"source", title, type, text}`) into the app.
 
-The page cannot fetch URLs, so postings are pasted as text.
+In both modes the page cannot fetch job links, so postings are pasted as text.
 
 ## Layout
 
 ```
 index.html        the whole app: styles, logic, prompts
 lib/              bundled third-party libraries (see below)
-tests/            jsdom smoke scripts with a simulated Claude and database
+tests/            jsdom scripts with a simulated Claude runtime, database and AI providers
 ```
 
 ## Tests
@@ -73,7 +106,7 @@ npm install
 npm test
 ```
 
-The scripts drive the real page in jsdom against a simulated Claude, database and download prompt. They cover intake and extraction, storage modes and migration, versions, templates and exports, and the learning loop. They print results and fail only on a crash; they do not exercise the live artifact runtime.
+The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, and bring-your-own-key and local-model modes (`tests/byo.js`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
 
 ## Bundled libraries
 
