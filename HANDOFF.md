@@ -2,7 +2,7 @@
 
 Updated at the end of each build cycle so work can resume without rereading the whole history.
 
-## State: v0.9.1 (11 Nov 2026)
+## State: v0.9.2 (11 Nov 2026)
 
 Everything below is on `main` and published to the inside-Claude copy.
 
@@ -24,6 +24,7 @@ Everything below is on `main` and published to the inside-Claude copy.
 0. Fact-match threshold (three quarters of wording) stays as is until the first real run; tune it with the owner afterwards.
 1. First real run from his main PC with an Anthropic key: resume, LinkedIn text, 7-question interview, one posting.
 2. GitHub Pages stays off until that run passes without breakage.
+3. The owner wants live support in chat during the first run, working through issues together.
 
 ## Next, in order
 
@@ -38,4 +39,5 @@ Everything below is on `main` and published to the inside-Claude copy.
 - No keys, accounts or model names in the code.
 - Nothing is written that the user's facts do not support. No invented numbers.
 - No em dashes or en dashes in anything the app writes, in every scenario (resumes now; cover letters, outreach and the rest when built). Nothing is rewritten silently.
+- The standards apply to every part of the tool, present and future: source verification, fact finding, writing, and anything added later. Every AI answer goes through one door (`askJSON`), carries the house style rule, lands in saved data that the dash scan and health check cover, and changes nothing without a user tap. New features must use the same door.
 - Push to `main`. Update this file and project memory at the end of each cycle.

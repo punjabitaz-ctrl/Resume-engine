@@ -52,4 +52,15 @@ const EXTRACT={profile:{name:'Sample Person',email:'s@example.com',phone:'555-01
  ok(rec.resume.summary.includes('—'),'the text is not altered silently; the user decides');
  click('[data-act=revise]');await wait(200);const rp=prompts[prompts.length-1];
  ok(rp.includes('Also fix these')&&rp.includes('Remove every em dash')&&rp.includes('Vary how bullets open'),'Revise sends the failed checks to the writer');
+ // long dashes anywhere in what the app holds: found after every AI step, never fixed silently, fixed only by approved repair
+ ok(R.dashScan().n>=2&&/long dash/.test(d.querySelector('#toast').textContent),'a long dash in any AI answer is caught and reported after the step');
+ S.facts[1].text='Ran partner enablement training — for reseller sales teams, 2019–2021';S.jobs[0].analysis.summary='Build the channel – fast.';S.jobs[0].jdText='Posting text — supplied by the user';
+ const v1=S.resumes[0],v2=S.resumes[1];v1.sentAt=Date.now();const issue=R.checkData().find(i=>i.style);
+ ok(issue&&/in facts/.test(issue.text)&&/in job notes/.test(issue.text)&&/in versions/.test(issue.text),'the scan covers facts, job notes and versions, not only resumes: '+(issue&&issue.text));
+ w.location.hash='data';await wait(30);R.S.ui.health=R.checkData();R.S.ui.checked=true;R.render();
+ click('[data-act=repairData]');await wait(100);ok(R.dashScan().n>0&&S.facts[1].text.includes('—'),'GUARDRAIL: long dashes are not replaced without the user’s own tap');
+ tap(w,d.querySelector('[data-act=repairData]'));await wait(100);
+ ok(S.facts[1].text==='Ran partner enablement training, for reseller sales teams, 2019 to 2021'&&S.jobs[0].analysis.summary==='Build the channel, fast.'&&!v2.resume.summary.includes('—'),'approved repair replaces long dashes with plain punctuation: '+S.facts[1].text);
+ ok(v1.resume.summary.includes('—')&&S.jobs[0].jdText.includes('—'),'a version already sent and text the user supplied are left exactly as they were');
+ ok(R.dashScan().n===0,'nothing left to flag after the approved repair');
  w.close()})().catch(e=>{console.error('FAIL',e);process.exit(1)});

@@ -46,6 +46,7 @@ Read this first: most published advice on tracking systems comes from vendors an
 - The writer receives these rules in every request.
 - Every version is checked by the app itself, in two groups: parsing and search, and human voice.
 - Checks flag; they never rewrite. The user edits, or approves a Revise that passes the failed checks to the writer.
+- The long-dash rule is enforced across everything the app holds, not only resumes: after every AI step the app scans facts, roles, job notes, lessons and unsent versions, reports any it finds, and replaces them only through a repair the user approves. Sent versions and text the user supplied are never touched.
 - All of it sits under the truth rules: no check may be satisfied by inventing a fact or a number.
 
 ## Sources
