@@ -1,4 +1,4 @@
-# Security and code review (v0.14.0, 12 Nov 2026)
+# Security and code review (v0.15.0, 12 Nov 2026)
 
 Scope: everything in this repository. Method: reading the code, static searches for risky patterns, `npm audit` on the bundled libraries, and automated tests in `tests/security.js`.
 
@@ -19,6 +19,8 @@ Resume text, work history, wins, job postings, interview notes and an AI provide
 | 7 | Bundled jsPDF 2.5.1, mammoth 1.6.0 and PDF.js 3.11.174 had published advisories, including script execution from a crafted PDF | Opening a hostile file | Upgraded to jsPDF 4.2.1, mammoth 1.13.0, PDF.js 6.5.438; `npm audit` reports none. PDF reader runs with evaluation off |
 | 8 | "Delete everything" left restore points, drafts, incident records and the error log | Data thought deleted stays on disk | All cleared |
 | 10 | Backups were plain JSON holding the whole work history | Anyone with the file reads everything | v0.14: every backup is encrypted with the user's password (AES-256-GCM, PBKDF2-SHA256, 600,000 rounds, fresh salt and nonce each time). No plain export exists. Wrong passwords and tampered files are rejected. Older plain backups still restore, with a warning |
+| 11 | The injection defence was a single fixed marker and a rule | Material could guess the marker, hide text in invisible characters, or pose as a system message | v0.15: one-time code on real markers per request; zero-width, direction-override, tag and control characters stripped from what is sent; a scan for wording aimed at an AI flags the source or posting; a flagged source is untrusted, so none of its facts is approved automatically; versions are checked for links and addresses missing from the user's facts; every number needs the user's confirmation before export |
+| 12 | One 170 KB code file | Hard to review and change safely | Split into twelve ordered files under `js/` |
 | 9 | Key storage was not explained | False sense of safety | Setup now says the key is stored unencrypted in this browser |
 
 ## Checked and found sound
@@ -29,6 +31,10 @@ Resume text, work history, wins, job postings, interview notes and an AI provide
 - No key, account or model name in the code.
 
 ## Accepted limits
+
+- Injection defences reduce risk; they do not remove it. A posting can still colour how the AI words things. The number lock, the fact review and the user's read of each version are the backstop.
+- Rules and material travel in one message. Moving the rules to a separate system message would be stronger and is worth doing once it can be tested against real providers.
+- Technical retries run without a tap (see README). They are limited to a frozen list that changes no saved content.
 
 - The key is not encrypted at rest. Any encryption done in the page could be undone by the same page, so it would add no real protection. Use a revocable key with a spend cap; "this session only" storage is available.
 - Styles allow inline style attributes (`style-src 'unsafe-inline'`); scripts do not.

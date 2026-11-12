@@ -21,12 +21,19 @@ const EXTRACT={profile:{name:'Sample Person',email:'s@example.com',phone:'555-01
  // facts
  type('#srcText',SOURCE);click('[data-act=addSource]');await wait(200);
  const f=S.facts;ok(f.length===4,'four facts extracted');
- ok(f[0].ok===true&&f[1].ok===true,'facts that match the uploaded source are approved, even when lightly reworded');
+ ok(f[1].ok===true,'a fact that matches the uploaded source and has no number is approved on its own');
+ ok(f[0].ok===false&&f[0].match===true&&f[0].num===true,'a matching fact that carries a number still waits for the user');
  ok(f[2].ok===false&&f[2].match===false,'a fact whose number is not in the source waits for approval');
  ok(f[3].ok===false,'a fact with wording the source does not contain waits for approval');
- ok(d.querySelector('#toast').textContent.includes('2 could not be matched'),'the user is told how many facts need approval');
+ ok(d.querySelector('#toast').textContent.includes('3 wait for your check'),'the user is told how many facts need approval');
  w.location.hash='facts';await wait(30);R.render();
- ok(d.querySelectorAll('.chip.have').length===2&&!!d.querySelector('.banner'),'pending facts are marked in the Fact base');
+ ok(d.querySelectorAll('.chip.have').length===3&&d.querySelectorAll('#review .rev').length===3,'facts to check are marked and gathered in one review list');
+ const rv=[...d.querySelectorAll('#review .rev')];
+ ok(rv[0].querySelector('.revs').textContent.includes('Signed 12 new distribution partners')&&rv[0].querySelectorAll('.revf .nok').length===2&&!rv[0].querySelector('.nmiss'),'each fact is shown beside the closest line of the source, with numbers found there marked');
+ ok(rv[1].querySelector('.revf .nmiss').textContent==='15'&&rv[2].querySelectorAll('.revf .wmiss').length>=3,'a number or wording the source does not contain is marked');
+ click('#review [data-act=confirmFact][data-id="'+f[0].id+'"]');await wait(50);ok(f[0].ok===false,'GUARDRAIL: a script cannot confirm a number');
+ tap(w,d.querySelector('#review [data-act=confirmFact][data-id="'+f[0].id+'"]'));await wait(50);ok(f[0].ok===true&&d.querySelectorAll('#review .rev').length===2,'a real tap confirms the fact and clears it from the list');
+ click('#review [data-act=rejectFact][data-id="'+f[2].id+'"]');await wait(50);ok(f[2].ok===false&&f[2].refuted===true&&d.querySelectorAll('#review .rev').length===1&&!!R.needsLook&&!R.needsLook(f[2]),'a rejected fact leaves the list and stays out of resumes');
  const box=d.querySelector('#ok-'+f[3].id);box.checked=true;box.dispatchEvent(new w.Event('change',{bubbles:true}));
  ok(f[3].ok===false&&box.checked===false,'GUARDRAIL: a script cannot approve an unmatched fact');
  // prompt and dates

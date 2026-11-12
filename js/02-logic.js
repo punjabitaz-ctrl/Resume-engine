@@ -23,10 +23,24 @@ function toks(t){return (norm(t).match(/[a-z0-9+#&%.]+/g)||[]).map(w=>w.replace(
 function corpus(){const t=S.sources.filter(x=>x&&x.trusted!==false).map(x=>x.text).join('\n');return{words:new Set(toks(t)),nums:new Set(nums(t))}}
 /* A fact counts as matching the user's own material when every number in it appears there and at least three quarters of its meaningful words do. */
 function matchesSource(text,c){if(nums(text).some(n=>!c.nums.has(n)))return false;const w=toks(text).filter(x=>!/^\d/.test(x));if(!w.length)return true;return w.filter(x=>c.words.has(x)).length/w.length>=0.75}
+/* Review helpers. A fact waits for the user when it carries any number, or when its wording was not found in the user's own material. */
+const needsLook=f=>!!f&&f.kind!=='win'&&f.ok===false&&!f.refuted&&(f.match===false||!!f.num);
+function srcLines(){const out=[];for(const s of S.sources)if(s&&s.trusted!==false)for(const l of String(s.text||'').split(/\n+|(?<=[.!?])\s+(?=[A-Z0-9])/)){const t=l.trim();if(t.length>=12)out.push({t:t.slice(0,400),src:s.title||s.type||'source',w:new Set(toks(t)),n:new Set(nums(t))})}return out}
+function closestLine(text,lines){const w=toks(text).filter(x=>!/^\d/.test(x)),n=nums(text);let best=null,bs=0;for(const l of lines){let sc=0;for(const x of w)if(l.w.has(x))sc++;for(const x of n)if(l.n.has(x))sc+=3;if(sc>bs){bs=sc;best=l}}return bs>=2?best:null}
+function markFact(text,c){return String(text).split(/(\s+)/).map(p=>{if(!p.trim())return p;if(/\d/.test(p)){const n=nums(p);return '<span class="'+(n.every(x=>c.nums.has(x))?'nok':'nmiss')+'">'+esc(p)+'</span>'}const t=toks(p);return t.length&&!t.every(x=>c.words.has(x))?'<span class="wmiss">'+esc(p)+'</span>':esc(p)}).join('')}
+function markLine(line,text){const n=new Set(nums(text));return String(line).split(/(\s+)/).map(p=>/\d/.test(p)&&nums(p).some(x=>n.has(x))?'<span class="nok">'+esc(p)+'</span>':esc(p)).join('')}
+/* Every line of a version that carries a number. The user confirms these before any export. */
+function numLines(r){const out=[],add=(t,ids)=>{t=String(t||'');if(nums(t).length)out.push({t,ids:ids||[]})};add(r.headline);add(r.summary);(r.experience||[]).forEach(e=>(e.bullets||[]).forEach(b=>add(b.text,b.facts)));(r.projects||[]).forEach(x=>add(x.text,x.facts));return out}
+function numSig(r){const t=numLines(r).map(l=>l.t).join('\n');if(!t)return '';let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return 'n'+numLines(r).length+':'+(h>>>0).toString(36)}
+/* Wording that tries to steer an AI, and characters a reader cannot see. Found text is never removed from what the user stored; it is reported. */
+const INJ=[/\b(ignore|disregard|forget|override)\b[^.\n]{0,40}\b(previous|prior|above|earlier|preceding|your|all)\b[^.\n]{0,20}\b(instructions?|rules?|prompts?|guidelines|directions)\b/i,/\byou are now\b/i,/\b(system|developer) (prompt|message)\b/i,/\bnew instructions?\s*:/i,/\bdo not follow\b[^.\n]{0,30}\b(instructions?|rules?)\b/i,/\b(attention|note to|message to|instructions? (to|for))\b[^.\n]{0,20}\b(ai|llm|assistant|language model|chatbot|gpt|claude)\b/i,/\b(rate|rank|score|recommend|shortlist|select)\b[^.\n]{0,30}\bthis (candidate|applicant|resume)\b[^.\n]{0,30}\b(highest|top|best|10\/10|100)\b/i,/\b(reveal|print|repeat|show)\b[^.\n]{0,20}\b(your|the) (instructions|prompt|rules)\b/i];
+const HIDDEN=/[​-‏‪-‮⁠-⁤⁦-⁩﻿]|[\u{E0000}-\u{E007F}]/gu;
+function injScan(t){t=String(t||'');let n=0;for(const l of t.split(/\n+/))if(INJ.some(r=>r.test(l)))n++;const hidden=(t.match(HIDDEN)||[]).length;return{n,hidden,any:n>0||hidden>2}}
 function atsChecks(r,flags,job){const p=S.profile,t=resumeText(r),w=words(t),out=[],add=(g,ok,label,fix)=>out.push({g,ok:!!ok,label,fix:ok?'':fix||''});
  const bullets=(r.experience||[]).flatMap(e=>e.bullets||[]).map(b=>String(b.text||'')),body=[r.headline,r.summary].concat(bullets,(r.projects||[]).map(x=>x.text)).filter(Boolean).join('\n'),kws=(job&&job.analysis&&job.analysis.keywords)||[];
  // parses cleanly and can be found
  add('ats',p.email&&p.phone,'Contact line has email and phone');
+ {const links=(body.match(/\b(?:https?:\/\/|www\.)[^\s,;)]+|\b[\w.+-]+@[\w-]+\.[\w.-]+|\b[a-z0-9-]+\.(?:com|io|net|org|ai|co|dev|app)\b[^\s,;)]*/gi)||[]).map(l=>l.toLowerCase().replace(/[.]+$/,'')),mine=(JSON.stringify(p)+' '+factsText(S.facts.filter(f=>f.ok!==false))).toLowerCase(),odd=links.filter(l=>!mine.includes(l));add('ats',!odd.length,'No link or address that is missing from your own facts','Remove "'+(odd[0]||'')+'": it does not appear in your facts or contact header.')}
  add('ats',r.summary&&(r.skills||[]).length&&(r.experience||[]).length,'Standard sections: Summary, Skills, Experience');
  add('ats',(r.education||[]).length>0,'Education section present');
  const badDates=(r.experience||[]).filter(e=>!/^[A-Z][a-z]{2} \d{4} - ([A-Z][a-z]{2} \d{4}|Present)$/.test(e.dates||'')).length;

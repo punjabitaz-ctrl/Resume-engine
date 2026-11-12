@@ -9,7 +9,7 @@ const html=require('./load')();const wait=ms=>new Promise(r=>setTimeout(r,ms));
  const click=sel=>d.querySelector(sel).dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
  const type=(sel,v)=>{const el=d.querySelector(sel);el.value=v;el.dispatchEvent(new w.Event('input',{bubbles:true}))};
  R.S.facts=[{id:'f1',kind:'skill',text:'SECRET RESUME LINE',roleId:''}];
- type('#srcText','Some resume text that is long enough to be accepted as a source.');click('[data-act=addSource]');await wait(200);
+ type('#srcText','Some resume text that is long enough to be accepted as a source.');R.HEAL.wait=20;click('[data-act=addSource]');await wait(700);
  console.log('error logged',R.errs.length,R.errs[0].code,'| toast:',d.querySelector('#toast').textContent.slice(0,90));
  w.location.hash='data';await wait(30);R.render();type('#fbText','Extraction stopped.');click('[data-act=copyReport]');await wait(50);click('[data-act=saveReport]');await wait(50);
  console.log('report has version',clip.includes('Version: '+R.APP_VERSION),'error',clip.includes('rate_limited'),'note',clip.includes('Extraction stopped.'),'no resume content',!clip.includes('SECRET'),'| file',saved[0]&&saved[0].filename);

@@ -45,6 +45,7 @@ const canned={
  w.location.hash='interview';await wait(30);R.render();click('[data-act=genQuestions]');await wait(100);type('#iva0','They produced 3 million dollars');click('[data-act=saveAnswers]');await wait(150);console.log('sources',S.sources.length);
  // exports
  w.location.hash='tailor';await wait(30);R.render();
+ click('[data-act=export][data-id=txt]');await wait(100);console.log('export locked until numbers are confirmed',saved.length===0&&!!d.querySelector('#numcheck [data-act=confirmNums]'));if(saved.length)process.exit(1);S.resumes.forEach(r=>{r.numsOk=R.numSig(r.resume)});R.render();
  click('[data-act=export][data-id=docx]');await wait(2500);click('[data-act=export][data-id=pdf]');await wait(2500);click('[data-act=export][data-id=txt]');await wait(200);
  for(const s of saved){let buf;if(typeof s.data==='string')buf=Buffer.from(s.data);else buf=Buffer.from(await new Promise(res=>{const fr=new w.FileReader();fr.onload=()=>res(fr.result);fr.readAsArrayBuffer(s.data)}));const out=path.join(__dirname,'out','out.'+s.filename.split('.').pop());fs.writeFileSync(out,buf);console.log('saved',s.filename,buf.length)}
  console.log('toast',d.querySelector('#toast').textContent,'errors',errs);

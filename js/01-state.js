@@ -4,7 +4,7 @@ const S={profile:{},roles:[],facts:[],memory:[],sources:[],jobs:[],resumes:[],ui
 const TABS=[['sources','Sources'],['wins','Wins'],['interview','Intake'],['facts','Fact base'],['jobs','Jobs'],['tailor','Tailor'],['prep','Interview prep'],['memory','Memory'],['data','Setup']];
 const KINDS=['win','achievement','responsibility','skill','project','education','certification','award','summary','other'];
 const STATUSES=['Saved','Applied','Interview','Offer','Rejected','No response'];
-const APP_VERSION='0.14.0';
+const APP_VERSION='0.15.0';
 const IN_CLAUDE=!!(window.claude&&window.claude.use);
 const REPO='https://github.com/punjabitaz-ctrl/Resume-engine';
 /* PAGE PROTECTIONS (standalone copy). Inside Claude the host page sets its own policy, so these apply only outside it.

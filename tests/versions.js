@@ -27,6 +27,7 @@ const html=require('./load')();const wait=ms=>new Promise(r=>setTimeout(r,ms));
  click('.ver.on [data-act=markSent]');console.log('label',v2.label,'sent',!!v2.sentAt,'job',S.jobs[0].status,'editable spans',d.querySelectorAll('.sheet [contenteditable]').length,'banner',!!d.querySelector('.banner'));
  click('.ver.on [data-act=dupVer]');const v3=S.resumes[2];console.log('dup',v3.label,v3.kind,v3.from,'open',S.ui.resId===v3.id,'editable',d.querySelectorAll('.sheet [contenteditable]').length>0);
  // templates → export each
+ S.resumes.forEach(r=>{r.numsOk=R.numSig(r.resume)});
  for(const k of Object.keys(R.TPL)){change('#tpl',k);click('[data-act=export][data-id=pdf]');await wait(k==='classic'?2500:300);const s=saved.pop();const buf=Buffer.from(await new Promise(res=>{const fr=new w.FileReader();fr.onload=()=>res(fr.result);fr.readAsArrayBuffer(s.data)}));fs.writeFileSync(path.join(__dirname,'out','tpl-'+k+'.pdf'),buf);
   const X=require('docx');w.docx=X;fs.writeFileSync(path.join(__dirname,'out','tpl-'+k+'.docx'),await X.Packer.toBuffer(R.buildDocx(v3.resume,R.TPL[k])));
   console.log(k,'pdf',buf.length,'sheet font',d.querySelector('.sheet').style.fontFamily.slice(0,18),'h5',[...d.querySelectorAll('.sheet h5')].map(x=>x.textContent).join('/'))}

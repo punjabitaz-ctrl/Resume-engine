@@ -56,7 +56,13 @@ Every AI output here is a proposal or advice. Drafts are accepted only by your o
 
 ## How facts are approved
 
-Extraction is done by the AI, so its output is not trusted by default. A new fact is switched on automatically only when the app itself can match it to material you uploaded (resume, LinkedIn text, interview answers, other sources): every number in the fact must appear there, and at least three quarters of its meaningful words must too. Anything else stays off, marked as waiting, until you tick it yourself. Unapproved facts are never sent to the writer.
+A fact extracted from your sources is approved on its own only when its wording is found in your own material and it carries no number. Every fact with a number waits for you, and so does any wording the sources do not contain. The Fact base gathers these in one review list: each fact sits beside the closest line of your own material, numbers found there are marked green, numbers not found are marked red, and words not found are shaded. One tap confirms, one tap rejects. A rejected fact stays out of resumes.
+
+Before any export, each version lists every line that carries a number beside the fact it came from. Export stays locked until you confirm them, and asks again if such a line changes.
+
+## What runs without a tap
+
+Technical retries only: trying a failed step again, waiting out a rate limit, tidying punctuation slips in an answer, asking the AI to repair an unreadable answer, reading in smaller parts, and turning off streaming. Each runs at most once per failed step, changes no saved content, and is logged in Setup as automatic. Everything else still needs a direct tap: confirming numbers and unmatched facts, repairing saved data, sending fewer facts to the writer, accepting AI wording, and approving lessons.
 
 ## Resume standard
 
@@ -154,7 +160,7 @@ In both modes the page cannot fetch job links, so postings are pasted as text.
 - Your data stays in your browser (or in your own Claude account in the inside-Claude copy). There is no server, no account, no analytics and no third-party request of any kind except the AI engine you choose.
 - Your API key is sent only to the provider you set. It is stored unencrypted in this browser, so use a key you can revoke and do not use a shared computer. It is stripped from every error message, problem report and console line.
 - Standalone copies set a content security policy (scripts only from the app's own files, no plugins, no forms) and refuse to run inside another site's frame.
-- Resumes, postings and other pasted text are fenced as material, and the AI is told to treat anything inside as data, never as instructions.
+- Resumes, postings and other pasted text are fenced as material, and the AI is told to treat anything inside as data, never as instructions. Each request seals its markers with a one-time code, hidden characters are stripped from what is sent, wording aimed at an AI is detected and flagged, a flagged source loses automatic approval for all its facts, and a version is checked for links or addresses that are not in your own facts.
 - Imported backups are sanitised before use: unsafe ids are remapped, unexpected types are forced back, and prototype keys are dropped.
 - PDFs are read with script evaluation off.
 - Every backup is locked with a password you choose (AES-256-GCM, key derived with PBKDF2-SHA256, 600,000 rounds). The password is never stored and cannot be recovered. Unlocked backups cannot be exported.
@@ -166,7 +172,8 @@ Full findings, including what is still unverified, are in [docs/SECURITY.md](doc
 
 ```
 index.html        the page shell (no inline script)
-app.js            all logic and prompts
+js/               the app code in twelve ordered files: state, logic, storage, AI engine, prompts,
+                  actions, export, repair, views, wins, interview prep, events
 app.css           all styles (system fonts, nothing loaded from other sites)
 lib/              bundled third-party libraries (see below)
 docs/             the resume standard, interview prep notes and the security review

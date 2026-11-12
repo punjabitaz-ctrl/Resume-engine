@@ -13,38 +13,38 @@ const tap=require('./tap');
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 const prompt=b=>(b.messages&&b.messages[0].content)||'';
 (async()=>{
- // 1. trailing comma: no silent tidy. The panel asks, and tidying happens only on approval
- let t=await ready(mk(async()=>reply(JSON.stringify(GOOD).replace(/}$/,',}'))));t.type('#srcText',src);t.click('[data-act=addSource]');await wait(200);
- ok(t.R.S.facts.length===0&&!!t.d.querySelector('.incident [data-id=tidy]'),'a punctuation slip is not tidied silently; the panel offers it as a fix');
- tap(t.w,t.d.querySelector('.incident [data-id=tidy]'));await wait(300);
- ok(t.R.S.facts.length===1&&t.R.S.ui.tidyOnce===false&&!t.d.querySelector('.incident'),'approved tidy applies once and the step completes');t.w.close();
- // 2. unreadable answer: panel, permission, AI repair, retry succeeds
- t=await ready(mk(async b=>prompt(b).startsWith('The text below was meant')?reply(JSON.stringify(GOOD)):reply('{"profile":{"name":"Sample Person" "roles":[oops')));t.type('#srcText',src);t.click('[data-act=addSource]');await wait(200);
- ok(!!t.d.querySelector('.incident')&&t.R.S.facts.length===0,'unreadable answer opens the repair panel');
- ok(t.calls.length===1&&t.R.S.sources.length===1,'nothing is changed before the user approves a fix');
- t.click('.incident [data-id=jsonRepair]');await wait(150);
- ok(t.calls.length===1&&!!t.d.querySelector('.incident')&&t.R.S.facts.length===0,'GUARDRAIL: a script-made click on a fix is refused');
- t.R.applyFix('jsonRepair');await wait(150);
- ok(t.calls.length===1&&t.R.S.facts.length===0,'GUARDRAIL: calling the fix function directly is refused');
+ // Technical retries now run on their own (owner's decision); anything that changes saved data or what the writer is given still needs a tap.
+ // 1. trailing comma: tidied automatically, once, and logged
+ let t=await ready(mk(async()=>reply(JSON.stringify(GOOD).replace(/}$/,',}'))));t.type('#srcText',src);t.click('[data-act=addSource]');await wait(400);
+ ok(t.R.S.facts.length===1&&t.R.S.ui.tidyOnce===false&&!t.d.querySelector('.incident'),'a punctuation slip is tidied automatically and the step completes');
+ ok(t.R.S.profile.heals.length===1&&t.R.S.profile.heals[0].fix==='tidy'&&t.R.S.profile.heals[0].auto===true,'the automatic fix is recorded as automatic');t.w.close();
+ // 2. unreadable answer: tidy fails, AI repair runs automatically, retry succeeds
+ t=await ready(mk(async b=>prompt(b).startsWith('The text below was meant')?reply(JSON.stringify(GOOD)):reply('{"profile":{"name":"Sample Person" "roles":[oops')));t.type('#srcText',src);t.click('[data-act=addSource]');await wait(600);
+ ok(t.R.S.facts.length===1&&t.R.S.sources.length===1&&!t.d.querySelector('.incident'),'an unreadable answer is repaired automatically without duplicating the source');
+ ok(t.R.S.profile.heals.map(h=>h.fix).join()==='tidy,jsonRepair'&&t.R.S.profile.heals.every(h=>h.auto),'each automatic attempt is logged in order');t.w.close();
+ // 2b. a failure that automatic retries cannot clear stops and asks; the gate still guards every tap
+ let good=false;t=await ready(mk(async()=>good?reply(JSON.stringify(GOOD)):reply('not data at all')));t.type('#srcText',src);t.click('[data-act=addSource]');await wait(800);
+ ok(!!t.d.querySelector('.incident')&&t.R.S.facts.length===0&&t.R.S.profile.heals.length===3,'automatic recovery stops after three attempts and shows the repair panel');
+ const n0=t.calls.length;good=true;t.click('.incident [data-id=retry]');await wait(150);
+ ok(t.calls.length===n0&&!!t.d.querySelector('.incident')&&t.R.S.facts.length===0,'GUARDRAIL: a script-made click on a fix is refused');
+ t.R.applyFix('retry');await wait(150);t.R.doFix('retry',false);await wait(150);t.R.doFix('factCap',true);t.R.doFix('dataRepair',true);await wait(150);
+ ok(t.calls.length===n0&&t.R.S.facts.length===0&&!t.R.AI.cfg.factCap,'GUARDRAIL: calling the fix functions directly is refused, and content-changing fixes can never run automatically');
  ok(t.R.reportText().includes('approval gate'),'GUARDRAIL: refused attempts are logged');
- ok(!!t.d.querySelector('.incident [data-id=jsonRepair]')&&t.d.querySelector('.incident [data-id=tidy]').className.includes('primary'),'the proposed fixes match the failure');
- tap(t.w,t.d.querySelector('.incident [data-id=jsonRepair]'));await wait(300);
- ok(t.R.S.ui.repairOnce===false&&t.R.S.facts.length===1&&t.R.S.sources.length===1&&!t.d.querySelector('.incident'),'approved fix is applied and the failed step is retried without duplicating the source');
- ok(t.R.S.profile.heals.length===1&&t.R.S.profile.heals[0].fix==='jsonRepair','the approved fix is recorded');t.w.close();
- // 3. answer cut short on a long document: smaller parts
+ ok(Object.keys(t.R.AUTO_FIX).sort().join()==='jsonRepair,nostream,retry,smaller,tidy,wait'&&Object.isFrozen(t.R.AUTO_FIX),'the automatic list holds technical retries only and cannot be changed at run time');
+ tap(t.w,t.d.querySelector('.incident [data-id=retry]'));await wait(300);
+ ok(t.R.S.facts.length===1&&t.R.S.sources.length===1&&!t.d.querySelector('.incident'),'an approved fix is applied and the failed step is retried');t.w.close();
+ // 3. answer cut short on a long document: smaller parts, automatically
  const long=Array.from({length:400},(_,i)=>'Line '+i+' of a long resume with plenty of detail in it.').join('\n');
- t=await ready(mk(async b=>prompt(b).length>12000?reply('{"profile":{"na','length'):reply(JSON.stringify(GOOD))));t.type('#srcText',long);t.click('[data-act=addSource]');await wait(200);
- ok(t.R.ruleDiagnosis(t.R.S.ui.incident).fixes[0]==='smaller','a cut-off answer during extraction proposes smaller parts');
- tap(t.w,t.d.querySelector('.incident [data-id=smaller]'));await wait(400);
- ok(t.R.AI.cfg.chunk===7000&&t.R.S.facts.length>=1&&!t.d.querySelector('.incident'),'smaller parts are applied and extraction completes');t.w.close();
- // 4. unreachable server: settings fixes only, no AI analysis offered
- t=await ready(mk(async()=>{throw new TypeError('Failed to fetch')}));t.type('#srcText',src);t.click('[data-act=addSource]');await wait(200);
- ok(!!t.d.querySelector('.incident [data-id=setup]')&&!t.d.querySelector('[data-act=analyze]'),'when the AI is unreachable the panel offers settings fixes, not AI analysis');t.w.close();
- // 5. rate limit: wait then retry
- let hits=0;t=await ready(mk(async()=>++hits===1?{ok:false,status:429,json:async()=>({error:{message:'slow down'}})}:reply(JSON.stringify(GOOD))));t.R.HEAL.wait=50;t.type('#srcText',src);t.click('[data-act=addSource]');await wait(200);
- tap(t.w,t.d.querySelector('.incident [data-id=wait]'));await wait(500);ok(t.R.S.facts.length===1,'rate limit: waits, then retries with approval');t.w.close();
+ t=await ready(mk(async b=>prompt(b).length>12000?reply('{"profile":{"na','length'):reply(JSON.stringify(GOOD))));t.type('#srcText',long);t.click('[data-act=addSource]');await wait(600);
+ ok(t.R.AI.cfg.chunk===7000&&t.R.S.facts.length>=1&&!t.d.querySelector('.incident'),'a cut-off answer is retried in smaller parts automatically and extraction completes');t.w.close();
+ // 4. unreachable server: retries on its own, then settings fixes only, no AI analysis offered
+ t=await ready(mk(async()=>{throw new TypeError('Failed to fetch')}));t.type('#srcText',src);t.click('[data-act=addSource]');await wait(600);
+ ok(!!t.d.querySelector('.incident [data-id=setup]')&&!t.d.querySelector('[data-act=analyze]'),'when the AI stays unreachable the panel offers settings fixes, not AI analysis');t.w.close();
+ // 5. rate limit: waits then retries on its own
+ let hits=0;t=await ready(mk(async()=>++hits===1?{ok:false,status:429,json:async()=>({error:{message:'slow down'}})}:reply(JSON.stringify(GOOD))));t.R.HEAL.wait=50;t.type('#srcText',src);t.click('[data-act=addSource]');await wait(700);
+ ok(t.R.S.facts.length===1&&!t.d.querySelector('.incident'),'rate limit: waits, then retries without being asked');t.w.close();
  // 6. unknown failure: AI analysis proposes a fix from the allowed list only
- hits=0;t=await ready(mk(async b=>{if(prompt(b).startsWith('You are the repair assistant'))return reply(JSON.stringify({cause:'The server hiccuped.',evidence:'Error 500.',fix:'delete_everything',why:'x'}));return ++hits===1?{ok:false,status:500,json:async()=>({error:{message:'boom'}})}:reply(JSON.stringify(GOOD))}));t.type('#srcText',src);t.click('[data-act=addSource]');await wait(200);
+ hits=0;t=await ready(mk(async b=>{if(prompt(b).startsWith('You are the repair assistant'))return reply(JSON.stringify({cause:'The server hiccuped.',evidence:'Error 500.',fix:'delete_everything',why:'x'}));return ++hits<=2?{ok:false,status:500,json:async()=>({error:{message:'boom'}})}:reply(JSON.stringify(GOOD))}));t.type('#srcText',src);t.click('[data-act=addSource]');await wait(500);
  t.click('[data-act=analyze]');await wait(200);const inc=t.R.S.ui.incident;
  ok(inc&&inc.diag&&inc.diag.cause==='The server hiccuped.'&&inc.diag.fix==='report','AI analysis is shown, and a fix outside the allowed list is refused');
  ok(t.R.S.facts.length===0&&t.R.AI.cfg.chunk===14000&&t.R.AI.cfg.stream===true&&!!t.d.querySelector('.incident'),'GUARDRAIL: the AI analysis changes nothing by itself');

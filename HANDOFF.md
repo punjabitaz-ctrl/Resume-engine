@@ -2,7 +2,7 @@
 
 Updated at the end of each build cycle so work can resume without rereading the whole history.
 
-## State: v0.14.0 (12 Nov 2026)
+## State: v0.15.0 (12 Nov 2026)
 
 Everything below is on `main` and published to the inside-Claude copy.
 
@@ -22,6 +22,7 @@ Everything below is on `main` and published to the inside-Claude copy.
 - A go-to-market readiness analysis exists as a private Claude doc (not in this public repo). Its verdict: not ready for outside testers until the owner's real run passes. First-tier gaps: real-model check, first-run guide, a home plus key setup guide (or the inside-Claude route), terms and privacy note, backup reminder and persistent storage, pasted text treated as data, a private feedback channel.
 - v0.13: code and security review (docs/SECURITY.md). App split into index.html, app.js and app.css; no third-party requests; standalone CSP and frame refusal; key redaction; pasted text fenced as data; imported data sanitised; bundled libraries upgraded to versions with no known advisories (jsPDF 4.2.1, mammoth 1.13.0, PDF.js 6.5.438); thorough delete.
 - v0.14: backups are always password locked (owner: "password protected backups are a must"). No plain export.
+- v0.15: code split into `js/` (twelve ordered classic scripts, no build step). Fact review list with the closest source line and marked numbers and words; confirm or reject per fact. Every fact with a number waits for the user; every version's numbers must be confirmed before export. Technical retries run automatically (frozen `AUTO_FIX` list, once each per failed step, logged). Injection defences strengthened (sealed markers, hidden characters stripped, flagged sources untrusted, foreign-link check).
 - Spoken mock interviews are approved as essential but not built. Decision made: the user chooses between Chrome's free built-in speech and a voice-capable model of their own choosing. Build is on hold with all other new features.
 
 ## Not yet proven
@@ -50,18 +51,23 @@ Everything below is on `main` and published to the inside-Claude copy.
 - Voice: offer both Chrome's free built-in speech and a voice-capable model the user picks.
 - Testers get the choice of the inside-Claude copy or the standalone copy.
 - The tool is for the owner's own job search first; it opens to others only if it works well.
+- Approvals: automate as much as possible up to critical points; the user always validates every number. Implemented as above.
+- Friends run their own copy; they do not share the owner's inside-Claude copy.
+- Problem reports stay public on GitHub for now.
+- Build on strong, proven research: every writing or interview rule must trace to a source listed in docs/.
+- First real run: morning of 12 Nov 2026 (owner's time), inside Claude.
 - New features are paused after the v0.13 review. Fixes from the first real run come first.
 
 ## Next, in order
 
-1. Fix whatever the first real run exposes.
+1. Fix whatever the first real run exposes. Watch for: too many number facts to confirm (review fatigue), false flags from the AI-wording scan, PDF upload inside Claude.
 2. Turn on GitHub Pages once the owner says the test passed.
 3. Invite the four testers.
 4. Phase 2, pipeline tracker (ROADMAP.md). Weekly view: outreach sent, applications submitted, people contacted, source of each lead.
 
 ## Standing rules for this project
 
-- A human approves every AI decision. No bypass, ever.
+- A human approves every AI decision that changes content: facts with numbers or unmatched wording, numbers in each version, saved-data repairs, AI wording, lessons. No bypass. The only things that run without a tap are the technical retries in the frozen `AUTO_FIX` list (owner's decision, 12 Nov 2026); never add a content-changing fix to it.
 - No keys, accounts or model names in the code.
 - Nothing is written that the user's facts do not support. No invented numbers.
 - No em dashes or en dashes in anything the app writes, in every scenario (resumes now; cover letters, outreach and the rest when built). Nothing is rewritten silently.
