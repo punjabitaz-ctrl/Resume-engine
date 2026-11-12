@@ -2,7 +2,7 @@
 
 Updated at the end of each build cycle so work can resume without rereading the whole history.
 
-## State: v0.15.0 (12 Nov 2026)
+## State: v0.16.0 (12 Nov 2026)
 
 Everything below is on `main` and published to the inside-Claude copy.
 
@@ -23,6 +23,7 @@ Everything below is on `main` and published to the inside-Claude copy.
 - v0.13: code and security review (docs/SECURITY.md). App split into index.html, app.js and app.css; no third-party requests; standalone CSP and frame refusal; key redaction; pasted text fenced as data; imported data sanitised; bundled libraries upgraded to versions with no known advisories (jsPDF 4.2.1, mammoth 1.13.0, PDF.js 6.5.438); thorough delete.
 - v0.14: backups are always password locked (owner: "password protected backups are a must"). No plain export.
 - v0.15: code split into `js/` (twelve ordered classic scripts, no build step). Fact review list with the closest source line and marked numbers and words; confirm or reject per fact. Every fact with a number waits for the user; every version's numbers must be confirmed before export. Technical retries run automatically (frozen `AUTO_FIX` list, once each per failed step, logged). Injection defences strengthened (sealed markers, hidden characters stripped, flagged sources untrusted, foreign-link check).
+- v0.16: only metrics are held for confirmation, not dates or years (`metrics()` in js/02-logic.js; a bare four-digit figure with no date wording still counts as a metric). The review list groups facts by role with a gated "I read these: confirm all" tap that covers only the facts shown.
 - Spoken mock interviews are approved as essential but not built. Decision made: the user chooses between Chrome's free built-in speech and a voice-capable model of their own choosing. Build is on hold with all other new features.
 
 ## Not yet proven
@@ -55,7 +56,7 @@ Everything below is on `main` and published to the inside-Claude copy.
 - Friends run their own copy; they do not share the owner's inside-Claude copy.
 - Problem reports stay public on GitHub for now.
 - Build on strong, proven research: every writing or interview rule must trace to a source listed in docs/.
-- First real run: morning of 12 Nov 2026 (owner's time), inside Claude.
+- First real run: morning of 12 Nov 2026 (owner's time), inside Claude. Material: resume as a Word file, LinkedIn as pasted text.
 - New features are paused after the v0.13 review. Fixes from the first real run come first.
 
 ## Next, in order

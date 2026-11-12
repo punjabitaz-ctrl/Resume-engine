@@ -130,3 +130,4 @@ a.btn{display:inline-block;font-weight:500;border-radius:7px;border:1px solid va
 /* fact and number review */
 .rev{border-top:1px solid var(--line,#ddd);padding:10px 0}.rev .row{margin-top:8px}.revf{font-size:15px;line-height:1.5}.revs{margin-top:4px;font-size:13.5px;line-height:1.5;opacity:.9}
 .wmiss{background:var(--warn-soft);border-radius:3px;padding:0 2px}.nok{background:#dff3e4;color:#14532d;border-radius:3px;padding:0 3px;font-weight:600}.nmiss{background:var(--bad-soft);color:var(--bad);border-radius:3px;padding:0 3px;font-weight:600}
+.revg{margin-top:14px}.revg h3{margin:0}

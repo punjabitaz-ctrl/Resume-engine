@@ -23,14 +23,30 @@ function toks(t){return (norm(t).match(/[a-z0-9+#&%.]+/g)||[]).map(w=>w.replace(
 function corpus(){const t=S.sources.filter(x=>x&&x.trusted!==false).map(x=>x.text).join('\n');return{words:new Set(toks(t)),nums:new Set(nums(t))}}
 /* A fact counts as matching the user's own material when every number in it appears there and at least three quarters of its meaningful words do. */
 function matchesSource(text,c){if(nums(text).some(n=>!c.nums.has(n)))return false;const w=toks(text).filter(x=>!/^\d/.test(x));if(!w.length)return true;return w.filter(x=>c.words.has(x)).length/w.length>=0.75}
+/* Metrics are the numbers a user must confirm: counts, money, percentages, sizes. Dates are not metrics (owner's decision, 12 Nov 2026).
+   A four-digit year counts as a date only in clear date wording; when in doubt it is treated as a metric, so the user is asked. */
+const MONTHS='jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?';
+const YR='(?:19[5-9]\\d|20[0-3]\\d)';
+function metrics(s){s=String(s??'')
+ .replace(new RegExp('\\b(?:'+MONTHS+')\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+'+YR+'\\b','gi'),' ')
+ .replace(new RegExp('\\b(?:'+MONTHS+')\\.?,?\\s+'+YR+'\\b','gi'),' ')
+ .replace(new RegExp('\\b\\d{1,2}[\\/.-]\\d{1,2}[\\/.-](?:'+YR+'|\\d{2})\\b','g'),' ')
+ .replace(new RegExp('\\b\\d{1,2}[\\/-]'+YR+'\\b','g'),' ')
+ .replace(new RegExp('\\b'+YR+'\\s*(?:to|through|until|[-\\u2013\\u2014])\\s*(?:'+YR+'|present|current|now|today)\\b','gi'),' ')
+ .replace(new RegExp('\\b(?:in|since|from|until|till|through|during|by|before|after|early|mid|late|of|class of|fy|year|q[1-4])\\s+'+YR+'\\b(?![,.]?\\d)(?!\\s*(?:%|percent|\\+|k\\b|m\\b|x\\b))','gi'),' ')
+ .replace(new RegExp('\\(\\s*'+YR+'\\s*\\)','g'),' ')
+ .replace(/\bq[1-4]\b/gi,' ');
+ return nums(s)}
 /* Review helpers. A fact waits for the user when it carries any number, or when its wording was not found in the user's own material. */
 const needsLook=f=>!!f&&f.kind!=='win'&&f.ok===false&&!f.refuted&&(f.match===false||!!f.num);
+/* The facts the review list is showing right now, grouped by role. "Confirm all for this role" covers only these, never ones the user has not been shown. */
+function reviewShown(){const order=S.roles.map(r=>r.id);return S.facts.filter(needsLook).sort((a,b)=>order.indexOf(a.roleId)-order.indexOf(b.roleId)).slice(0,25)}
 function srcLines(){const out=[];for(const s of S.sources)if(s&&s.trusted!==false)for(const l of String(s.text||'').split(/\n+|(?<=[.!?])\s+(?=[A-Z0-9])/)){const t=l.trim();if(t.length>=12)out.push({t:t.slice(0,400),src:s.title||s.type||'source',w:new Set(toks(t)),n:new Set(nums(t))})}return out}
 function closestLine(text,lines){const w=toks(text).filter(x=>!/^\d/.test(x)),n=nums(text);let best=null,bs=0;for(const l of lines){let sc=0;for(const x of w)if(l.w.has(x))sc++;for(const x of n)if(l.n.has(x))sc+=3;if(sc>bs){bs=sc;best=l}}return bs>=2?best:null}
 function markFact(text,c){return String(text).split(/(\s+)/).map(p=>{if(!p.trim())return p;if(/\d/.test(p)){const n=nums(p);return '<span class="'+(n.every(x=>c.nums.has(x))?'nok':'nmiss')+'">'+esc(p)+'</span>'}const t=toks(p);return t.length&&!t.every(x=>c.words.has(x))?'<span class="wmiss">'+esc(p)+'</span>':esc(p)}).join('')}
 function markLine(line,text){const n=new Set(nums(text));return String(line).split(/(\s+)/).map(p=>/\d/.test(p)&&nums(p).some(x=>n.has(x))?'<span class="nok">'+esc(p)+'</span>':esc(p)).join('')}
 /* Every line of a version that carries a number. The user confirms these before any export. */
-function numLines(r){const out=[],add=(t,ids)=>{t=String(t||'');if(nums(t).length)out.push({t,ids:ids||[]})};add(r.headline);add(r.summary);(r.experience||[]).forEach(e=>(e.bullets||[]).forEach(b=>add(b.text,b.facts)));(r.projects||[]).forEach(x=>add(x.text,x.facts));return out}
+function numLines(r){const out=[],add=(t,ids)=>{t=String(t||'');if(metrics(t).length)out.push({t,ids:ids||[]})};add(r.headline);add(r.summary);(r.experience||[]).forEach(e=>(e.bullets||[]).forEach(b=>add(b.text,b.facts)));(r.projects||[]).forEach(x=>add(x.text,x.facts));return out}
 function numSig(r){const t=numLines(r).map(l=>l.t).join('\n');if(!t)return '';let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return 'n'+numLines(r).length+':'+(h>>>0).toString(36)}
 /* Wording that tries to steer an AI, and characters a reader cannot see. Found text is never removed from what the user stored; it is reported. */
 const INJ=[/\b(ignore|disregard|forget|override)\b[^.\n]{0,40}\b(previous|prior|above|earlier|preceding|your|all)\b[^.\n]{0,20}\b(instructions?|rules?|prompts?|guidelines|directions)\b/i,/\byou are now\b/i,/\b(system|developer) (prompt|message)\b/i,/\bnew instructions?\s*:/i,/\bdo not follow\b[^.\n]{0,30}\b(instructions?|rules?)\b/i,/\b(attention|note to|message to|instructions? (to|for))\b[^.\n]{0,20}\b(ai|llm|assistant|language model|chatbot|gpt|claude)\b/i,/\b(rate|rank|score|recommend|shortlist|select)\b[^.\n]{0,30}\bthis (candidate|applicant|resume)\b[^.\n]{0,30}\b(highest|top|best|10\/10|100)\b/i,/\b(reveal|print|repeat|show)\b[^.\n]{0,20}\b(your|the) (instructions|prompt|rules)\b/i];

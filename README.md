@@ -56,9 +56,9 @@ Every AI output here is a proposal or advice. Drafts are accepted only by your o
 
 ## How facts are approved
 
-A fact extracted from your sources is approved on its own only when its wording is found in your own material and it carries no number. Every fact with a number waits for you, and so does any wording the sources do not contain. The Fact base gathers these in one review list: each fact sits beside the closest line of your own material, numbers found there are marked green, numbers not found are marked red, and words not found are shaded. One tap confirms, one tap rejects. A rejected fact stays out of resumes.
+A fact extracted from your sources is approved on its own only when its wording is found in your own material and it carries no metric. Every fact with a metric (a count, an amount, a percentage) waits for you, and so does any wording the sources do not contain. Dates and years are not held. The Fact base gathers these in one review list: each fact sits beside the closest line of your own material, numbers found there are marked green, numbers not found are marked red, and words not found are shaded. One tap confirms, one tap rejects, and once you have read a role's facts one tap confirms all of them. A rejected fact stays out of resumes.
 
-Before any export, each version lists every line that carries a number beside the fact it came from. Export stays locked until you confirm them, and asks again if such a line changes.
+Before any export, each version lists every line that carries a metric beside the fact it came from. Export stays locked until you confirm them, and asks again if such a line changes.
 
 ## What runs without a tap
 

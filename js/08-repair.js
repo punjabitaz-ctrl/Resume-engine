@@ -7,7 +7,7 @@
 const Gate=(()=>{let live=null;return Object.freeze({
  grant(e,what){if(!e||e.isTrusted!==true){live=null;return false}live={what,at:Date.now()};return true},
  use(what){const ok=!!live&&live.what===what&&Date.now()-live.at<3000;live=null;if(!ok)logErr('approval gate',{code:'blocked',message:'refused "'+what+'": no direct approval from the user'});return ok}})})();
-const GATED=Object.freeze({confirmFact:1,confirmNums:1,fix:1,repairData:1,undoRepair:1,approveLessons:1,useWording:1,useTmay:1});
+const GATED=Object.freeze({confirmRole:1,confirmFact:1,confirmNums:1,fix:1,repairData:1,undoRepair:1,approveLessons:1,useWording:1,useTmay:1});
 const PASS=Symbol('approved');
 const HEAL={wait:30000};
 const FIXES=Object.freeze({retry:'Try the step again',wait:'Wait 30 seconds, then try again',smaller:'Read documents in smaller parts, then try again',tidy:'Allow small punctuation slips in the answer to be tidied this once (no AI call), then try again',jsonRepair:'Let the AI repair the unreadable answer this once (one extra request), then try again',nostream:'Turn off live streaming of answers, then try again',factCap:'Send only the facts most relevant to the job, then try again',dataRepair:'Repair the saved data, then try again',setup:'Open Setup to fix the AI engine settings',report:'Draft a problem report for the maintainer'});

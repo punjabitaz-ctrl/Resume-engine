@@ -34,6 +34,14 @@ const EXTRACT={profile:{name:'Sample Person',email:'s@example.com',phone:'555-01
  click('#review [data-act=confirmFact][data-id="'+f[0].id+'"]');await wait(50);ok(f[0].ok===false,'GUARDRAIL: a script cannot confirm a number');
  tap(w,d.querySelector('#review [data-act=confirmFact][data-id="'+f[0].id+'"]'));await wait(50);ok(f[0].ok===true&&d.querySelectorAll('#review .rev').length===2,'a real tap confirms the fact and clears it from the list');
  click('#review [data-act=rejectFact][data-id="'+f[2].id+'"]');await wait(50);ok(f[2].ok===false&&f[2].refuted===true&&d.querySelectorAll('#review .rev').length===1&&!!R.needsLook&&!R.needsLook(f[2]),'a rejected fact leaves the list and stays out of resumes');
+ // metrics, not dates; confirm all for a role
+ const M=R.metrics;ok(M('Channel Manager since 2019').length===0&&M('Jan 2026 to Present').length===0&&M('Led partnerships from 2019 to 2023 (2021)').length===0&&M('Promoted in March 2022, on 03/15/2022').length===0,'dates and years are not treated as metrics');
+ ok(M('Grew revenue 40% in 2023').join()==='40'&&M('Managed 2000 partners').join()==='2000'&&M('Closed $2.5M across 12 accounts in Q3 2024').join()==='2.5,12'&&M('Cut onboarding from 2020 hours to 900').includes('900'),'counts, money and percentages are metrics, and a bare four-digit figure is treated as one');
+ S.facts.push({id:'fx1',kind:'achievement',text:'Trained 40 reseller sales teams',roleId:S.roles[0].id,ok:false,match:true,num:true},{id:'fx2',kind:'achievement',text:'Signed 12 partners',roleId:S.roles[0].id,ok:false,match:true,num:true},{id:'fx3',kind:'responsibility',text:'Joined in 2019',roleId:S.roles[0].id,ok:true,match:true,num:false});R.render();
+ const cr=()=>d.querySelector('#review [data-act=confirmRole]');ok(!!cr()&&cr().textContent.includes('3'),'a role with several facts to check offers one confirm-all tap');
+ cr().dispatchEvent(new w.MouseEvent('click',{bubbles:true}));await wait(50);ok(S.facts.find(x=>x.id==='fx1').ok===false,'GUARDRAIL: a script cannot confirm a whole role');
+ tap(w,cr());await wait(50);ok(S.facts.find(x=>x.id==='fx1').ok===true&&S.facts.find(x=>x.id==='fx2').ok===true&&f[2].ok===false&&f[2].refuted===true&&!d.querySelector('#review'),'a real tap confirms every fact shown for that role, and a rejected fact stays rejected');
+ S.facts=S.facts.filter(x=>!/^fx/.test(x.id));f[3].ok=false;
  const box=d.querySelector('#ok-'+f[3].id);box.checked=true;box.dispatchEvent(new w.Event('change',{bubbles:true}));
  ok(f[3].ok===false&&box.checked===false,'GUARDRAIL: a script cannot approve an unmatched fact');
  // prompt and dates
