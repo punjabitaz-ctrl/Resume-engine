@@ -3,7 +3,7 @@ const {JSDOM}=require('jsdom');const fs=require('fs');const path=require('path')
 const html=require('./load')();const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const EXTRACT={profile:{name:'Sample Person'},roles:[{company:'Acme',title:'Manager',start:'Jan 2020',end:'Present'}],facts:[{kind:'achievement',text:'Signed 12 partners',company:'Acme',title:'Manager'}]};
 function sse(chunks){let i=0;const enc=new TextEncoder();return{getReader:()=>({read:async()=>i<chunks.length?{done:false,value:enc.encode(chunks[i++])}:{done:true}})}}
-function mk(fetchImpl,{idb=false}={}){const calls=[];const dom=new JSDOM(html,{runScripts:'dangerously',url:'https://tester.example/',pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};w.TextDecoder=TextDecoder;w.URL.createObjectURL=()=>'blob:x';w.URL.revokeObjectURL=()=>{};
+function mk(fetchImpl,{idb=false}={}){const calls=[];const dom=new JSDOM(html,{runScripts:'dangerously',url:'https://tester.example/',pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};Object.defineProperty(w,'crypto',{value:require('crypto').webcrypto,configurable:true});w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;w.TextDecoder=TextDecoder;w.URL.createObjectURL=()=>'blob:x';w.URL.revokeObjectURL=()=>{};
   if(idb){const f=require('fake-indexeddb');w.indexedDB=new f.IDBFactory();w.structuredClone=w.structuredClone||(o=>JSON.parse(JSON.stringify(o)))}
   w.fetch=async(u,o)=>{calls.push({u,o});return fetchImpl(u,o,calls)}}});return{w:dom.window,d:dom.window.document,calls}}
 const ok=(cond,msg)=>{console.log((cond?'PASS ':'FAIL ')+msg);if(!cond)process.exitCode=1};
@@ -46,7 +46,7 @@ const ok=(cond,msg)=>{console.log((cond?'PASS ':'FAIL ')+msg);if(!cond)process.e
  // 4. IndexedDB persistence and native download
  ({w,d}=mk(async()=>({ok:false,status:500,json:async()=>({})}),{idb:true}));await wait(300);R=w.__re;R.S.memory.push({id:'m1',text:'kept'});R.Store.state('memory');await wait(100);
  ok((await R.Local.get()).memory[0].text==='kept'&&!w.localStorage.getItem('resume-engine'),'data persists in IndexedDB when available');
- let clicked='';w.HTMLAnchorElement.prototype.click=function(){clicked=this.download};w.location.hash='data';await wait(30);R.render();w.document.querySelector('[data-act=exportBackup]').dispatchEvent(new w.MouseEvent('click',{bubbles:true}));await wait(100);
+ let clicked='';w.HTMLAnchorElement.prototype.click=function(){clicked=this.download};w.location.hash='data';await wait(30);R.render();['bkPass','bkPass2'].forEach(i=>{w.document.getElementById(i).value='correct horse battery'});w.document.querySelector('[data-act=exportBackup]').dispatchEvent(new w.MouseEvent('click',{bubbles:true}));await wait(1500);
  ok(clicked.startsWith('resume-engine-backup-'),'downloads work without the Claude runtime');w.close();
  ok(!/sk-ant|sk-proj|Bearer [A-Za-z0-9]{20}/.test(html),'no credential-shaped strings in the source');
 })().catch(e=>{console.error('FAIL',e);process.exit(1)});

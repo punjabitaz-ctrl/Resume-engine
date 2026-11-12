@@ -1,4 +1,4 @@
-# Security and code review (v0.13.0, 12 Nov 2026)
+# Security and code review (v0.14.0, 12 Nov 2026)
 
 Scope: everything in this repository. Method: reading the code, static searches for risky patterns, `npm audit` on the bundled libraries, and automated tests in `tests/security.js`.
 
@@ -18,6 +18,7 @@ Resume text, work history, wins, job postings, interview notes and an AI provide
 | 6 | Imported backups were trusted as is | A crafted file could plant odd ids, types or prototype keys | `cleanData()` runs on every load and import |
 | 7 | Bundled jsPDF 2.5.1, mammoth 1.6.0 and PDF.js 3.11.174 had published advisories, including script execution from a crafted PDF | Opening a hostile file | Upgraded to jsPDF 4.2.1, mammoth 1.13.0, PDF.js 6.5.438; `npm audit` reports none. PDF reader runs with evaluation off |
 | 8 | "Delete everything" left restore points, drafts, incident records and the error log | Data thought deleted stays on disk | All cleared |
+| 10 | Backups were plain JSON holding the whole work history | Anyone with the file reads everything | v0.14: every backup is encrypted with the user's password (AES-256-GCM, PBKDF2-SHA256, 600,000 rounds, fresh salt and nonce each time). No plain export exists. Wrong passwords and tampered files are rejected. Older plain backups still restore, with a warning |
 | 9 | Key storage was not explained | False sense of safety | Setup now says the key is stored unencrypted in this browser |
 
 ## Checked and found sound
@@ -32,7 +33,7 @@ Resume text, work history, wins, job postings, interview notes and an AI provide
 - The key is not encrypted at rest. Any encryption done in the page could be undone by the same page, so it would add no real protection. Use a revocable key with a spend cap; "this session only" storage is available.
 - Styles allow inline style attributes (`style-src 'unsafe-inline'`); scripts do not.
 - The connect policy allows any https or http host, because the user may point the app at any provider or a local model.
-- Anyone with access to the browser profile or a backup file can read the data. Backups are plain JSON.
+- Anyone with access to the browser profile can read the data held there. Backups are locked, but only as strong as the password chosen; a forgotten password cannot be recovered.
 - Text sent to an AI provider is governed by that provider's terms.
 
 ## Not yet verified

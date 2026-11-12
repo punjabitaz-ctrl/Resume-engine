@@ -3,7 +3,7 @@ const {JSDOM}=require('jsdom');const fs=require('fs');const path=require('path')
 const html=require('./load')();const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 const KEY='sk-test-abcdefghijklmnop1234';
-function mk(fetchImpl,opts){const prompts=[];const dom=new JSDOM(html,Object.assign({runScripts:'dangerously',url:'https://tester.example/',pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};w.TextDecoder=TextDecoder;w.__pwned=0;
+function mk(fetchImpl,opts){const prompts=[];const dom=new JSDOM(html,Object.assign({runScripts:'dangerously',url:'https://tester.example/',pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};Object.defineProperty(w,'crypto',{value:require('crypto').webcrypto,configurable:true});w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;w.TextDecoder=TextDecoder;w.__pwned=0;
   if(opts&&opts.claude)w.claude={use:async()=>null};
   w.fetch=async(u,o)=>{const b=JSON.parse(o.body);prompts.push(b.messages[0].content);return fetchImpl(b)}}},{}));return{w:dom.window,d:dom.window.document,prompts}}
 const reply=o=>({ok:true,headers:{get:()=>'application/json'},json:async()=>({choices:[{message:{content:JSON.stringify(o)},finish_reason:'stop'}]})});
@@ -53,4 +53,20 @@ const reply=o=>({ok:true,headers:{get:()=>'application/json'},json:async()=>({ch
  ok(!/\beval\(|new Function|document\.write|insertAdjacentHTML|outerHTML\s*=/.test(js),'no eval, document.write or other risky sinks in the code');
  ok(js.includes('isEvalSupported:false')&&js.includes("window.top!==window.self"),'the PDF reader runs with script evaluation off, and the page refuses to run inside another site’s frame');
  const urls=[...new Set((js.match(/https?:\/\/[^'"`\s)]+/g)||[]))];ok(urls.every(u=>/^(https:\/\/(api\.anthropic\.com|api\.openai\.com|openrouter\.ai|generativelanguage\.googleapis\.com|api\.groq\.com|github\.com\/punjabitaz-ctrl|provider\.example)|http:\/\/localhost)/.test(u)),'the only addresses in the code are provider presets the user picks and the project page: '+urls.length);
+ // locked backups
+ {let {w,d}=mk(async()=>reply({}));await wait(300);const R=w.__re,S=R.S;let got=null;w.HTMLAnchorElement.prototype.click=function(){got=this};const blobs=[];const oc=w.URL.createObjectURL;w.URL.createObjectURL=b=>{blobs.push(b);return 'blob:x'};w.URL.revokeObjectURL=()=>{};
+  S.profile.name='Sample Person';S.roles=[{id:'r1',title:'Partner Manager',company:'ExampleCo'}];S.facts=[{id:'f1',roleId:'r1',text:'Signed 12 new distribution partners',ok:true}];
+  w.location.hash='data';await wait(30);R.render();const click=q=>d.querySelector(q).dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
+  click('[data-act=exportBackup]');await wait(300);ok(!got,'no backup leaves the app without a password');
+  d.getElementById('bkPass').value='short';d.getElementById('bkPass2').value='short';click('[data-act=exportBackup]');await wait(300);ok(!got,'a short backup password is refused');
+  d.getElementById('bkPass').value='correct horse battery';d.getElementById('bkPass2').value='correct horse batterx';click('[data-act=exportBackup]');await wait(300);ok(!got,'mismatched backup passwords are refused');
+  const f=await R.lockBackup(Object.assign({app:'resume-engine'},R.snapshot()),'correct horse battery');const txt=JSON.stringify(f);
+  ok(f.locked===true&&f.iter>=600000&&!/Sample Person|Signed 12|ExampleCo/.test(txt)&&!('facts' in f),'a locked backup holds no readable name, employer or fact');
+  const f2=await R.lockBackup(R.snapshot(),'correct horse battery');ok(f2.salt!==f.salt&&f2.iv!==f.iv&&f2.data!==f.data,'each backup uses a fresh salt and nonce');
+  let bad=false;try{await R.unlockBackup(f,'wrong password here')}catch(e){bad=true}ok(bad,'the wrong password does not open a backup');
+  const t=JSON.parse(txt);t.data=t.data.slice(0,20)+(t.data[20]==='A'?'B':'A')+t.data.slice(21);let tam=false;try{await R.unlockBackup(t,'correct horse battery')}catch(e){tam=true}ok(tam,'a tampered backup is rejected');
+  const back=await R.unlockBackup(f,'correct horse battery');ok(back.facts[0].text==='Signed 12 new distribution partners','the right password restores the data exactly');
+  S.ui.impLocked=f;R.render();ok(!!d.getElementById('bkOpen')&&!d.querySelector('[data-act=confirmImport]'),'a locked backup asks for its password before anything can be restored');
+  d.getElementById('bkOpen').value='correct horse battery';click('[data-act=unlockImport]');await wait(1500);ok(!!d.querySelector('[data-act=confirmImport]')&&S.ui.imp&&S.ui.imp.facts.length===1,'after unlocking, restore still needs the confirm tap');
+  ok(!JSON.stringify(S.ui.draft).includes('correct horse')&&!JSON.stringify(R.snapshot()).includes('correct horse'),'the backup password is never kept in app data');w.close()}
  await wait(100)})().catch(e=>{console.error('FAIL',e);process.exit(1)});

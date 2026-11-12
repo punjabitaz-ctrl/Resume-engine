@@ -157,6 +157,7 @@ In both modes the page cannot fetch job links, so postings are pasted as text.
 - Resumes, postings and other pasted text are fenced as material, and the AI is told to treat anything inside as data, never as instructions.
 - Imported backups are sanitised before use: unsafe ids are remapped, unexpected types are forced back, and prototype keys are dropped.
 - PDFs are read with script evaluation off.
+- Every backup is locked with a password you choose (AES-256-GCM, key derived with PBKDF2-SHA256, 600,000 rounds). The password is never stored and cannot be recovered. Unlocked backups cannot be exported.
 - "Delete everything" removes data, restore points, drafts, incident records and the error log.
 
 Full findings, including what is still unverified, are in [docs/SECURITY.md](docs/SECURITY.md).

@@ -2,7 +2,7 @@
 
 Updated at the end of each build cycle so work can resume without rereading the whole history.
 
-## State: v0.13.0 (12 Nov 2026)
+## State: v0.14.0 (12 Nov 2026)
 
 Everything below is on `main` and published to the inside-Claude copy.
 
@@ -21,6 +21,7 @@ Everything below is on `main` and published to the inside-Claude copy.
 - v0.12: users can add their own story themes; interview debriefs feed the learning loop as approved, interview-scope lessons that shape later prep packs (never resumes).
 - A go-to-market readiness analysis exists as a private Claude doc (not in this public repo). Its verdict: not ready for outside testers until the owner's real run passes. First-tier gaps: real-model check, first-run guide, a home plus key setup guide (or the inside-Claude route), terms and privacy note, backup reminder and persistent storage, pasted text treated as data, a private feedback channel.
 - v0.13: code and security review (docs/SECURITY.md). App split into index.html, app.js and app.css; no third-party requests; standalone CSP and frame refusal; key redaction; pasted text fenced as data; imported data sanitised; bundled libraries upgraded to versions with no known advisories (jsPDF 4.2.1, mammoth 1.13.0, PDF.js 6.5.438); thorough delete.
+- v0.14: backups are always password locked (owner: "password protected backups are a must"). No plain export.
 - Spoken mock interviews are approved as essential but not built. Decision made: the user chooses between Chrome's free built-in speech and a voice-capable model of their own choosing. Build is on hold with all other new features.
 
 ## Not yet proven
@@ -33,7 +34,7 @@ Everything below is on `main` and published to the inside-Claude copy.
 ## Waiting on the owner
 
 0. Fact-match threshold (three quarters of wording) stays as is until the first real run; tune it with the owner afterwards.
-1. First real run from his main PC with an Anthropic key: resume, LinkedIn text, 7-question interview, one posting.
+1. First real run inside Claude, uploading from his PC (standalone run with an Anthropic key comes after that passes): resume, LinkedIn text, 7-question interview, one posting.
 2. GitHub Pages stays off until that run passes without breakage.
 3. The owner wants live support in chat during the first run, working through issues together.
 

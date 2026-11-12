@@ -6,7 +6,7 @@ function fakeDb(docs,canWrite){const snap=(p)=>({id:p.split('/').pop(),exists:p 
  return{doc,collection:col}}
 const JD=('Partner Development Manager, AI Platforms. Build channel partnerships, partner enablement, co-sell, generative AI, Salesforce, Ingram Micro. ').repeat(3);
 function mk(docs,{owner=true,canWrite=()=>true,id='u1',url}={}){const calls=[];const saved=[];
- const dom=new JSDOM(html,{runScripts:'dangerously',url:url||('file://'+path.join(__dirname,'../index.html')),pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};
+ const dom=new JSDOM(html,{runScripts:'dangerously',url:url||('file://'+path.join(__dirname,'../index.html')),pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};Object.defineProperty(w,'crypto',{value:require('crypto').webcrypto,configurable:true});w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;
   const sample=async()=>({text:'x'});sample.json=async(prompt,o)=>{calls.push(prompt);
    if(prompt.startsWith('You are building'))return{profile:{name:'Sample Person',email:'s@e.co',phone:'555'},roles:[{company:'Acme XR',title:'Channel Manager',start:'Jan 2026',end:'Present'},{company:'Acme XR',title:'Channel & Partnerships Manager',start:'Jan 2026',end:'Present'}],facts:[{kind:'achievement',text:'Signed 12 distribution partners including Ingram Micro, part '+calls.length,company:'Acme XR',title:'Channel Manager'},{kind:'skill',text:'Salesforce, channel partnerships, partner enablement '+calls.length},{kind:'education',text:'B.S. Business '+calls.length}]};
    if(prompt.startsWith('Analyze this job'))return{company:'ExampleCo',title:'PDM',keywords:[{term:'channel partnerships',weight:3},{term:'partner enablement',weight:3},{term:'generative AI',weight:2},{term:'Salesforce',weight:1}]};
@@ -39,7 +39,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
  click('[data-act=revise]');await wait(300);rec=S.resumes[1];const last=calls[calls.length-1];
  console.log('v2',rec.label,'score',R.scoreText(S.jobs[0],R.resumeText(rec.resume)).pct,'flags',R.flagsFor(rec.resume).length,'revise prompt terms',/Work in these posting terms.*partner enablement/.test(last),'flagged',last.includes('[unverified: 99]'));
  // backup, wipe, restore
- w.location.hash='data';await wait(30);R.render();click('[data-act=exportBackup]');await wait(50);const bk=JSON.parse(saved[0].data);console.log('backup',saved[0].filename,bk.facts.length,bk.resumes.length);
+ w.location.hash='data';await wait(30);R.render();['bkPass','bkPass2'].forEach(i=>{w.document.getElementById(i).value='correct horse battery'});click('[data-act=exportBackup]');await wait(1500);const locked=JSON.parse(saved[0].data);console.log('locked backup',locked.locked,locked.cipher,!!locked.facts);const bk=await R.unlockBackup(locked,'correct horse battery');console.log('backup',saved[0].filename,bk.facts.length,bk.resumes.length);
  click('[data-act=wipe]');click('[data-act=wipe]');await wait(150);console.log('wiped',S.facts.length,Object.keys(docs).filter(k=>k.includes('/lib/')).length);
  S.ui.imp=bk;R.render();click('[data-act=confirmImport]');await wait(150);console.log('restored',S.facts.length,S.resumes.length,Object.keys(docs).filter(k=>k.includes('/lib/')).length);
  w.close();
