@@ -1,5 +1,8 @@
-// Tests load the real page with its own script and styles inlined, so one HTML string can be handed to jsdom.
+// Tests load the real page with its own scripts and styles inlined, so one HTML string can be handed to jsdom.
+// Each script stays a separate <script> element, in page order, exactly as a browser would run them.
 const fs=require('fs');const path=require('path');const root=path.join(__dirname,'..');
-module.exports=()=>fs.readFileSync(path.join(root,'index.html'),'utf8')
- .replace('<link rel="stylesheet" href="app.css">',()=>'<style>'+fs.readFileSync(path.join(root,'app.css'),'utf8')+'</style>')
- .replace('<script src="app.js"></script>',()=>'<script>'+fs.readFileSync(path.join(root,'app.js'),'utf8')+'</script>');
+const read=f=>fs.readFileSync(path.join(root,f),'utf8');
+module.exports=()=>read('index.html')
+ .replace('<link rel="stylesheet" href="app.css">',()=>'<style>'+read('app.css')+'</style>')
+ .replace(/<script src="(js\/[\w-]+\.js)"><\/script>/g,(m,f)=>'<script>'+read(f)+'</script>');
+module.exports.code=()=>fs.readdirSync(path.join(root,'js')).sort().map(f=>read('js/'+f)).join('\n');

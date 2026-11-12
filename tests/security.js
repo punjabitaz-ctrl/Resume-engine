@@ -47,7 +47,7 @@ const reply=o=>({ok:true,headers:{get:()=>'application/json'},json:async()=>({ch
  // 4. inside Claude the page leaves the host's policy alone
  ({w,d}=mk(async()=>reply({}),{claude:true}));await wait(300);ok(w.__re.IN_CLAUDE&&!d.querySelector('meta[http-equiv="Content-Security-Policy"]'),'inside Claude the page adds no policy of its own');w.close();
  // 5. static checks on the shipped files
- const page=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8'),css=fs.readFileSync(path.join(__dirname,'../app.css'),'utf8'),js=fs.readFileSync(path.join(__dirname,'../app.js'),'utf8');
+ const page=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8'),css=fs.readFileSync(path.join(__dirname,'../app.css'),'utf8'),js=require('./load').code();
  ok(!/https?:\/\//.test(page)&&!/url\(|@import|https?:\/\//.test(css),'the page and its styles load nothing from any other site');
  ok(page.includes('name="referrer" content="no-referrer"')&&!/<script>|onclick=|onerror=/.test(page),'no inline script in the page, and outgoing links send no referrer');
  ok(!/\beval\(|new Function|document\.write|insertAdjacentHTML|outerHTML\s*=/.test(js),'no eval, document.write or other risky sinks in the code');
