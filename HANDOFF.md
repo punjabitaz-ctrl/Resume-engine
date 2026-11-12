@@ -2,7 +2,7 @@
 
 Updated at the end of each build cycle so work can resume without rereading the whole history.
 
-## State: v0.12.0 (11 Nov 2026)
+## State: v0.13.0 (12 Nov 2026)
 
 Everything below is on `main` and published to the inside-Claude copy.
 
@@ -20,10 +20,13 @@ Everything below is on `main` and published to the inside-Claude copy.
 
 - v0.12: users can add their own story themes; interview debriefs feed the learning loop as approved, interview-scope lessons that shape later prep packs (never resumes).
 - A go-to-market readiness analysis exists as a private Claude doc (not in this public repo). Its verdict: not ready for outside testers until the owner's real run passes. First-tier gaps: real-model check, first-run guide, a home plus key setup guide (or the inside-Claude route), terms and privacy note, backup reminder and persistent storage, pasted text treated as data, a private feedback channel.
-- Spoken mock interviews are approved as essential but not built: waiting on the owner's decision about where speech is processed.
+- v0.13: code and security review (docs/SECURITY.md). App split into index.html, app.js and app.css; no third-party requests; standalone CSP and frame refusal; key redaction; pasted text fenced as data; imported data sanitised; bundled libraries upgraded to versions with no known advisories (jsPDF 4.2.1, mammoth 1.13.0, PDF.js 6.5.438); thorough delete.
+- Spoken mock interviews are approved as essential but not built. Decision made: the user chooses between Chrome's free built-in speech and a voice-capable model of their own choosing. Build is on hold with all other new features.
 
 ## Not yet proven
 
+- Never opened in a real browser. The CSP, the frame refusal and the PDF reader (now loaded as an ES module) are tested only in jsdom and Node.
+- PDF upload probably fails when index.html is opened straight from disk (file://), because browsers block module imports there. It fails with a clear message; .docx and pasted text still work. Served over http(s) or inside Claude it should work.
 - No real provider, key or local model has been used. All tests run against simulated providers.
 - The owner's own material has not been run through the app.
 
@@ -40,6 +43,13 @@ Everything below is on `main` and published to the inside-Claude copy.
 - AI may offer a more succinct or professional variation; the user approves it, so everything is user driven.
 - Ask for 2 to 3 wins per role regardless of role, with emphasis on the most recent.
 - Build the story bank early in the process.
+
+## Decisions from the owner (12 Nov 2026)
+
+- Voice: offer both Chrome's free built-in speech and a voice-capable model the user picks.
+- Testers get the choice of the inside-Claude copy or the standalone copy.
+- The tool is for the owner's own job search first; it opens to others only if it works well.
+- New features are paused after the v0.13 review. Fixes from the first real run come first.
 
 ## Next, in order
 

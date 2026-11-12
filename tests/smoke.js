@@ -1,6 +1,6 @@
 const {JSDOM}=require('jsdom');const fs=require('fs');const path=require('path');
 require('fs').mkdirSync(require('path').join(__dirname,'out'),{recursive:true});
-const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+const html=require('./load')();
 const JD=`Partner Development Manager, AI Platforms at ExampleCo. You will build and manage channel partnerships with distributors and resellers, drive partner enablement, own co-sell revenue targets, and launch go-to-market programs for generative AI products. Requirements: 10+ years in partnerships or channel sales; experience with distribution (Ingram Micro, TD SYNNEX); partner enablement; XR or AI hardware a plus; Salesforce.`.repeat(2);
 const canned={
  extract:{profile:{name:'Sample Person',email:'s@example.com',phone:'555-0100',location:'Princeton, NJ',links:['linkedin.com/in/sample']},roles:[{company:'Acme XR',title:'Channel Manager',location:'Remote',start:'Jan 2026',end:'Present'},{company:'OldCo',title:'Partner Lead',start:'Mar 2019',end:'Dec 2025'}],facts:[{kind:'achievement',text:'Signed 12 new distribution partners including Ingram Micro and TD SYNNEX in 6 months',company:'Acme XR',title:'Channel Manager',tags:['distribution']},{kind:'responsibility',text:'Ran partner enablement training for reseller sales teams',company:'OldCo',title:'Partner Lead',tags:['enablement']},{kind:'skill',text:'Salesforce, HubSpot, channel partnerships, go-to-market programs',tags:['tools']},{kind:'education',text:'B.S. Business, Example University'}]},
@@ -9,7 +9,7 @@ const canned={
 };
 (async()=>{
  const saved=[];
- const dom=new JSDOM(html,{runScripts:'dangerously',resources:'usable',url:'file://'+path.join(__dirname,'../index.html'),pretendToBeVisual:true,beforeParse(w){
+ const dom=new JSDOM(html,{runScripts:'dangerously',resources:'usable',url:'file://'+path.join(__dirname,'../index.html'),pretendToBeVisual:true,beforeParse(w){w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;
    w.scrollTo=()=>{};
    const sample=async()=>({text:'x'});
    sample.json=async(prompt,opts)=>{opts.onText&&opts.onText({text:'{}',delta:'{}'});

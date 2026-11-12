@@ -1,5 +1,5 @@
 const {JSDOM}=require('jsdom');const fs=require('fs');const path=require('path');
-const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+const html=require('./load')();
 function fakeDb(docs,canWrite){const snap=(p)=>({id:p.split('/').pop(),exists:p in docs,data:()=>docs[p]});
  const doc=p=>{if(p.split('/').length%2)throw new TypeError('doc parity '+p);return{path:p,get:async()=>snap(p),set:async d=>{if(!canWrite(p))throw{code:'invalid_argument'};docs[p]=JSON.parse(JSON.stringify(d))},delete:async()=>{if(!canWrite(p))throw{code:'invalid_argument'};delete docs[p]},collection:c=>col(p+'/'+c)}};
  const col=p=>{if(p.split('/').length%2===0)throw new TypeError('col parity '+p);const q={limit:()=>q,get:async()=>({docs:Object.keys(docs).filter(k=>k.startsWith(p+'/')&&k.slice(p.length+1).indexOf('/')<0).map(snap)}),doc:id=>doc(p+'/'+id)};return q};

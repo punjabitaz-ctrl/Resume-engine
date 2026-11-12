@@ -1,6 +1,6 @@
 // Wins: accomplishment stories in the user's own words (STAR), scored for strength and fed to the writer.
 const {JSDOM}=require('jsdom');const fs=require('fs');const path=require('path');
-const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const html=require('./load')();const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 (async()=>{const prompts=[];
  const dom=new JSDOM(html,{runScripts:'dangerously',url:'https://tester.example/',pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};w.TextDecoder=TextDecoder;w.Element.prototype.scrollIntoView=()=>{};

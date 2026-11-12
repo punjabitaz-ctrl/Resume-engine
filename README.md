@@ -149,12 +149,26 @@ Each signed-in person's data lives under their own `data/users/<id>/` subtree. T
 
 In both modes the page cannot fetch job links, so postings are pasted as text.
 
+## Privacy and protection
+
+- Your data stays in your browser (or in your own Claude account in the inside-Claude copy). There is no server, no account, no analytics and no third-party request of any kind except the AI engine you choose.
+- Your API key is sent only to the provider you set. It is stored unencrypted in this browser, so use a key you can revoke and do not use a shared computer. It is stripped from every error message, problem report and console line.
+- Standalone copies set a content security policy (scripts only from the app's own files, no plugins, no forms) and refuse to run inside another site's frame.
+- Resumes, postings and other pasted text are fenced as material, and the AI is told to treat anything inside as data, never as instructions.
+- Imported backups are sanitised before use: unsafe ids are remapped, unexpected types are forced back, and prototype keys are dropped.
+- PDFs are read with script evaluation off.
+- "Delete everything" removes data, restore points, drafts, incident records and the error log.
+
+Full findings, including what is still unverified, are in [docs/SECURITY.md](docs/SECURITY.md).
+
 ## Layout
 
 ```
-index.html        the whole app: styles, logic, prompts
+index.html        the page shell (no inline script)
+app.js            all logic and prompts
+app.css           all styles (system fonts, nothing loaded from other sites)
 lib/              bundled third-party libraries (see below)
-docs/             the resume standard and its sources
+docs/             the resume standard, interview prep notes and the security review
 HANDOFF.md        current state and next steps, updated at the end of each build cycle
 tests/            jsdom scripts with a simulated Claude runtime, database and AI providers
 ```
@@ -166,16 +180,16 @@ npm install
 npm test
 ```
 
-The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), fact approval plus the resume standard (`tests/standards.js`), the wins builder (`tests/wins.js`), and interview prep (`tests/prep.js`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
+The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), fact approval plus the resume standard (`tests/standards.js`), the wins builder (`tests/wins.js`), interview prep (`tests/prep.js`), the privacy and protection checks (`tests/security.js`), and a round trip that reads the exported PDF back with the bundled PDF reader (`tests/pdf-roundtrip.mjs`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
 
 ## Bundled libraries
 
 | File | Library | License |
 | --- | --- | --- |
 | `lib/docx.umd.js` | docx 8.5.0 | MIT |
-| `lib/jspdf.umd.min.js` | jsPDF 2.5.1 | MIT |
-| `lib/mammoth.browser.min.js` | mammoth 1.6.0 | BSD-2-Clause |
-| `lib/pdf.min.js`, `lib/pdf.worker.min.js` | PDF.js 3.11.174 | Apache-2.0 |
+| `lib/jspdf.umd.min.js` | jsPDF 4.2.1 | MIT |
+| `lib/mammoth.browser.min.js` | mammoth 1.13.0 | BSD-2-Clause |
+| `lib/pdf.min.js`, `lib/pdf.worker.min.js` | PDF.js 6.5.438 (legacy build, ES module) | Apache-2.0 |
 
 ## Where this is going
 

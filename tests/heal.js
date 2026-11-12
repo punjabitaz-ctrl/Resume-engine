@@ -1,6 +1,6 @@
 // Repair system: a failed step is explained, a fix is proposed, and nothing changes until the user approves.
 const {JSDOM}=require('jsdom');const fs=require('fs');const path=require('path');
-const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const html=require('./load')();const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const GOOD={profile:{name:'Sample Person'},roles:[{company:'Acme',title:'Manager',start:'Jan 2020',end:'Present'}],facts:[{kind:'achievement',text:'Signed 12 partners',company:'Acme',title:'Manager'}]};
 const reply=(content,finish)=>({ok:true,headers:{get:()=>'application/json'},json:async()=>({choices:[{message:{content},finish_reason:finish||'stop'}]})});
 function mk(fetchImpl){const calls=[];const dom=new JSDOM(html,{runScripts:'dangerously',url:'https://tester.example/',pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};w.TextDecoder=TextDecoder;w.fetch=async(u,o)=>{const body=o&&o.body?JSON.parse(o.body):{};calls.push(body);return fetchImpl(body,calls)}}});

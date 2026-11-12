@@ -1,7 +1,7 @@
 // Resume standards: facts are approved only when they match the user's own material, and every version is checked
 // for clean parsing, recruiter search and a human voice.
 const {JSDOM}=require('jsdom');const fs=require('fs');const path=require('path');const tap=require('./tap');
-const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const html=require('./load')();const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 const SOURCE='Channel Manager, Acme XR, Jan 2026 - Present. Signed 12 new distribution partners including Ingram Micro and TD SYNNEX in 6 months. Ran partner enablement training for reseller sales teams. Tools: Salesforce.';
 const EXTRACT={profile:{name:'Sample Person',email:'s@example.com',phone:'555-0100'},roles:[{company:'Acme XR',title:'Channel Manager',start:'Jan 2026',end:'Present'}],facts:[

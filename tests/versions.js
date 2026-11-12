@@ -1,8 +1,8 @@
 const {JSDOM}=require('jsdom');const fs=require('fs');const path=require('path');
 require('fs').mkdirSync(require('path').join(__dirname,'out'),{recursive:true});
-const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const html=require('./load')();const wait=ms=>new Promise(r=>setTimeout(r,ms));
 (async()=>{const saved=[];let n=0;
- const dom=new JSDOM(html,{runScripts:'dangerously',resources:'usable',url:'file://'+path.join(__dirname,'../index.html'),pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};
+ const dom=new JSDOM(html,{runScripts:'dangerously',resources:'usable',url:'file://'+path.join(__dirname,'../index.html'),pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;
   const sample=async()=>({text:'x'});sample.json=async(prompt)=>{const S=w.__re.S;
    if(prompt.startsWith('You are a master')){n++;const rev=prompt.includes('REVISION TASK');return{headline:'Partner Development Manager | Channel Partnerships',summary:'Channel partnerships leader who builds distribution programs across Ingram Micro and TD SYNNEX. '+(rev?'Drives partner enablement at scale.':'Known for 99 wins.'),skills:[{group:'Partnerships',items:['channel partnerships',rev?'partner enablement':'alliances']},{group:'Tools',items:['Salesforce','HubSpot']}],experience:[{roleId:'r1',bullets:[{text:'Signed 12 new distribution partners including Ingram Micro and TD SYNNEX in 6 months',facts:['f1']},{text:'Ran partner enablement training for reseller sales teams across three regions with quarterly refreshers and certification tracks',facts:['f2']}]},{roleId:'r2',bullets:[{text:'Managed reseller accounts',facts:['f3']}]}],projects:[{name:'Side project',text:'Built an internal partner portal',facts:['f3']}],education:[{text:'B.S. Business, Example University'}],certifications:[{text:'Example Cloud Certification'}],gaps:[]}}
    throw{code:'invalid_json'}};

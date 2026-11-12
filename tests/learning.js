@@ -1,5 +1,5 @@
 const {JSDOM}=require('jsdom');const fs=require('fs');const path=require('path');
-const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');const wait=ms=>new Promise(r=>setTimeout(r,ms));const tap=require('./tap');
+const html=require('./load')();const wait=ms=>new Promise(r=>setTimeout(r,ms));const tap=require('./tap');
 (async()=>{const prompts=[];let learnCalls=0;
  const dom=new JSDOM(html,{runScripts:'dangerously',url:'https://example.test/',pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};
   const sample=async()=>({text:'x'});sample.json=async(prompt)=>{prompts.push(prompt);const S=w.__re.S;

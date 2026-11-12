@@ -1,6 +1,6 @@
 // Standalone mode: no Claude runtime. The user brings an API key or a local model.
 const {JSDOM}=require('jsdom');const fs=require('fs');const path=require('path');
-const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const html=require('./load')();const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const EXTRACT={profile:{name:'Sample Person'},roles:[{company:'Acme',title:'Manager',start:'Jan 2020',end:'Present'}],facts:[{kind:'achievement',text:'Signed 12 partners',company:'Acme',title:'Manager'}]};
 function sse(chunks){let i=0;const enc=new TextEncoder();return{getReader:()=>({read:async()=>i<chunks.length?{done:false,value:enc.encode(chunks[i++])}:{done:true}})}}
 function mk(fetchImpl,{idb=false}={}){const calls=[];const dom=new JSDOM(html,{runScripts:'dangerously',url:'https://tester.example/',pretendToBeVisual:true,beforeParse(w){w.scrollTo=()=>{};w.TextDecoder=TextDecoder;w.URL.createObjectURL=()=>'blob:x';w.URL.revokeObjectURL=()=>{};
