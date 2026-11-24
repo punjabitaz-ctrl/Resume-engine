@@ -59,11 +59,21 @@ Everything below is on `main` and published to the inside-Claude copy.
 - First real run: morning of 12 Nov 2026 (owner's time), inside Claude. Material: resume as a Word file, LinkedIn as pasted text.
 - New features are paused after the v0.13 review. Fixes from the first real run come first.
 
+## Decisions from the owner (24 Nov 2026)
+
+Launch calls from the go-to-market readiness review. Four of its eight were already settled on 12 Nov (own search first, testers choose their copy, speech choice, feature pause); these settle the rest.
+
+- Legal: the owner confirms no employer or client is involved in any build of this project and sees no legal issues. No lawyer review before the test.
+- Feedback: testers get a private route, a short form after each session plus a direct line to the owner. GitHub issues stay public for problem reports.
+- Pass marks for the two-week test: all four finish the script, nobody loses data, no invented fact reaches a resume, and at least three of the four say they would use it for their next application.
+- Testers: the four friends already planned, with at least one working outside sales and technology. A check with less technical users waits for the wider 15 to 25 person round.
+- Name: "Resume Engine" stays for the private test. A new name, checked for conflicts, is chosen before the wider round.
+
 ## Next, in order
 
 1. Fix whatever the first real run exposes. Watch for: too many number facts to confirm (review fatigue), false flags from the AI-wording scan, PDF upload inside Claude.
 2. Turn on GitHub Pages once the owner says the test passed.
-3. Invite the four testers.
+3. Invite the four testers, with the session form and a private way to reach the owner.
 4. Phase 2, pipeline tracker (ROADMAP.md). Weekly view: outreach sent, applications submitted, people contacted, source of each lead.
 
 ## Standing rules for this project
