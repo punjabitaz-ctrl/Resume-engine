@@ -5,7 +5,7 @@
   "license": "AGPL-3.0-only",
   "description": "Browser app that turns a career fact base into job-specific, ATS-safe resumes. Runs as a Claude artifact.",
   "scripts": {
-    "test": "node tests/smoke.js && node tests/storage.js && node tests/versions.js && node tests/learning.js && node tests/feedback.js && node tests/byo.js && node tests/heal.js && node tests/standards.js && node tests/wins.js && node tests/prep.js && node tests/security.js && node tests/firstrun.js && node tests/factcheck.js && node tests/dashboard.js && node tests/pdf-roundtrip.mjs"
+    "test": "node tests/smoke.js && node tests/storage.js && node tests/versions.js && node tests/learning.js && node tests/feedback.js && node tests/byo.js && node tests/heal.js && node tests/standards.js && node tests/wins.js && node tests/prep.js && node tests/security.js && node tests/firstrun.js && node tests/factcheck.js && node tests/dashboard.js && node tests/coach.js && node tests/pdf-roundtrip.mjs"
   },
   "devDependencies": {
     "docx": "8.5.0",

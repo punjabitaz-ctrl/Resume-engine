@@ -49,6 +49,8 @@ Treat the key like a password. Do not email it or paste it into a problem report
 
 ## 4. Connect the app (Setup tab)
 
+The first time you open the app, a guided tour starts by itself and points at each of these fields. You can follow it instead of this list, and bring it back any time with **Guided tour** at the top of the page.
+
 1. Open the **Setup** tab.
 2. Under **AI engine**, set **Provider** to **Anthropic**.
 3. Paste your key into **API key**.

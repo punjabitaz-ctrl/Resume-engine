@@ -1,10 +1,10 @@
 "use strict";
 /* ---------- state ---------- */
 const S={profile:{},roles:[],facts:[],memory:[],sources:[],jobs:[],resumes:[],ui:{draft:{},jobId:null,resId:null,q:'',iv:null,imp:null,proposal:null,repairOnce:false,incident:null,health:[],checked:false,restore:null},busy:null,ready:false};
-const TABS=[['dash','Dashboard'],['sources','Sources'],['wins','Wins'],['interview','Intake'],['facts','Fact base'],['jobs','Jobs'],['tailor','Tailor'],['prep','Interview prep'],['memory','Memory'],['data','Setup']];
+const TABS=[['dash','Dashboard'],['sources','Sources'],['wins','Wins'],['interview','Intake'],['facts','Fact base'],['jobs','Jobs'],['tailor','Tailor'],['prep','Interview prep'],['practice','Mock interview'],['calls','Outreach and calls'],['memory','Memory'],['data','Setup']];
 const KINDS=['win','achievement','responsibility','skill','project','education','certification','award','summary','other'];
 const STATUSES=['Saved','Applied','Interview','Offer','Rejected','No response'];
-const APP_VERSION='0.19.1';
+const APP_VERSION='0.20.0';
 const IN_CLAUDE=!!(window.claude&&window.claude.use);
 const REPO='https://github.com/punjabitaz-ctrl/Resume-engine';
 /* PAGE PROTECTIONS (standalone copy). Inside Claude the host page sets its own policy, so these apply only outside it.
@@ -25,6 +25,9 @@ const Prefs={k:'resume-engine-prefs',
  clear(){try{localStorage.removeItem(this.k)}catch(e){}},
  changed(){if(!this.get().changedAt){this.set({changedAt:Date.now()});askPersist()}},
  backedUp(){this.set({backupAt:Date.now(),changedAt:0})}};
+/* Light or dark, the user's choice, kept with the other settings. Light unless they switch. */
+function applyTheme(){const dark=Prefs.get().theme==='dark';document.documentElement.dataset.theme=dark?'dark':'light';const b=document.getElementById('themeBtn');if(b){b.textContent=dark?'Light mode':'Dark mode';b.setAttribute('aria-pressed',String(dark))}}
+applyTheme();
 const errs=[];function logErr(where,e){errs.push({at:new Date().toISOString(),where:String(where),code:String((e&&e.code)||''),msg:scrub((e&&e.message)||'').slice(0,200)});if(errs.length>8)errs.shift()}
 const $=(s,r=document)=>r.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

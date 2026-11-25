@@ -8,7 +8,7 @@ It is one HTML file plus four bundled libraries. There is no server and nothing 
 
 | Tab | Job |
 | --- | --- |
-| Dashboard | Your search at a glance: applications, jobs that reached an interview, interview rounds and offers as tiles; a pipeline chart (applied, 1st, 2nd and later interviews, offer); status mix; applications per week; rounds by type; and one table of every role with status, next step, posting link and point of contact, editable in place. Every number comes from what you recorded. |
+| Dashboard | Your search at a glance: applications, jobs that reached an interview, interview rounds and offers as tiles; a pipeline chart (applied, 1st, 2nd and later interviews, offer); status mix; applications per week; rounds by type; a Due next list (follow-ups and interviews in the coming week, overdue first); a weekly application goal; which sources (referral, LinkedIn, job board and so on) lead to interviews; and one table of every role with status, source, next step and its date, posting link and point of contact, editable in place and downloadable as a spreadsheet. Every number comes from what you recorded. |
 | Sources | Upload PDF, DOCX or text (resume, LinkedIn, portfolio, project notes). Claude splits it into atomic facts. Long documents are read in parts. |
 | Wins | Your accomplishments told in full using STAR (situation, task, action, result): projects, awards, deliverables, recognition. Scored for strength, tracked per role, checked against a posting. |
 | Intake | Asks 7 questions aimed at gaps in the fact base, optionally targeted at one job. Answers become facts. |
@@ -16,8 +16,10 @@ It is one HTML file plus four bundled libraries. There is no server and nothing 
 | Jobs | Paste a posting. Get a weighted keyword map, an evidence score against your facts, and a status tracker. |
 | Tailor | Writes a version per job. Keyword match, checks, gaps, four templates, DOCX / PDF / TXT export, version history, compare, mark as sent. |
 | Interview prep | Story bank by theme, interview rounds, likely questions matched to your stories, timed practice with feedback, "tell me about yourself", research notes, debrief and thank-you drafts. |
+| Mock interview | A live practice interview with the same key: pick a job, round and seniority, answer by typing, and the interviewer asks follow-ups the way a real one would. At the end you get scores for structure, specificity, relevance and concision, what worked and what to improve per answer, and which of your own wins to use instead. Saved with the job. |
+| Outreach and calls | Drafts cover letters, recruiter and hiring manager notes, referral asks, follow-ups and connection requests from your approved facts only; any number not in your facts or the posting is flagged and blocks copying until you check it. Call review: load a transcript file from Whisper or OpenWhisper (txt, vtt, srt, json) or paste notes, and get feedback on the call, what they asked, next steps, follow-up points and a follow-up email to personalise. Optional recording in the browser with a consent check, transcribed by a Whisper server you choose. Nothing is ever sent by the app. |
 | Memory | Learned lessons (from your hand edits and results), results table, and your own standing instructions. |
-| Setup | AI engine (your key or local model), backup, restore, delete everything, and a problem report testers can copy and send (no resume content or keys in it). |
+| Setup | AI engine (your key or local model), guided tour, dark mode, backup, restore, delete everything, and a problem report testers can copy and send (no resume content or keys in it). |
 
 ## Rules the writer cannot break
 
@@ -194,7 +196,7 @@ npm install
 npm test
 ```
 
-The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), fact approval plus the resume standard (`tests/standards.js`), the wins builder (`tests/wins.js`), interview prep (`tests/prep.js`), the dashboard counts, charts and table edits (`tests/dashboard.js`), the privacy and protection checks (`tests/security.js`), the first-run guide, backup reminder and storage request (`tests/firstrun.js`), and a round trip that reads the exported PDF back with the bundled PDF reader (`tests/pdf-roundtrip.mjs`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
+The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), fact approval plus the resume standard (`tests/standards.js`), the wins builder (`tests/wins.js`), interview prep (`tests/prep.js`), the dashboard counts, charts and table edits (`tests/dashboard.js`), the guided tour, dark mode, due list, source chart, spreadsheet export, outreach drafts, call reviews and mock interviews (`tests/coach.js`), the privacy and protection checks (`tests/security.js`), the first-run guide, backup reminder and storage request (`tests/firstrun.js`), and a round trip that reads the exported PDF back with the bundled PDF reader (`tests/pdf-roundtrip.mjs`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
 
 ## Bundled libraries
 

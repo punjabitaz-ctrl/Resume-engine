@@ -13,20 +13,26 @@ Set up first with **START-HERE.md** in the main folder. This file has the test s
 
 Work through it over one or more sessions. You are **finished** when you have exported one tailored resume for a real job posting and downloaded a backup afterwards. Note the time you start, because the form asks how long things took.
 
-1. **Connect Claude.** Setup tab, as in START-HERE step 4, until **Test connection** says Connected. Note how many minutes this took.
-2. **Add your resume.** Sources tab: upload your resume as a Word file or PDF, or paste its text, and choose **Add source and extract facts**.
-3. **Add your LinkedIn profile.** Copy your LinkedIn About and Experience sections, paste them as a second source with the type **LinkedIn profile**, and extract again.
-4. **Run the intake.** Intake tab: choose **Ask me 7 questions**, answer only what is exactly true, skip the rest, then **Save answers as facts**.
-5. **Write three wins.** Wins tab: **Add a win** three times. One story each: the situation, what you did, and what changed. Try **Ask me what is missing** on at least one.
-6. **Review your facts.** Fact base tab: for each fact waiting for you, compare it with the closest line from your own material, then choose **Correct, use it** or **Wrong, reject it**. Look hard at every number.
-7. **Add a real job posting.** Jobs tab: paste the full text of a posting you might apply to (the app cannot open links) and choose **Add and analyze**.
-8. **Write a tailored resume.** Tailor tab: choose **Write tailored resume**. Read every line. If something is off, use **Revise: fix what is flagged here** or edit it.
-9. **Confirm the flagged lines and export.** Under **Lines to confirm before export**, check each line against your own record, choose **I checked every line**, then export **DOCX** or **PDF**. Open the file and check it.
-10. **Look at the Dashboard.** Set the job's status as if you applied, add a next step and a contact in the table, and check that the tiles and charts move. Say whether the counts match what you did.
-11. **Back up.** Setup tab, **Download locked backup**.
-12. **Fill in the form** below.
+1. **Take the guided tour.** It opens by itself the first time. It points at each part of the screen, starting with where your API key goes. Say whether any step confused you. (The **Guided tour** button at the top brings it back.)
+2. **Connect Claude.** Setup tab, as in START-HERE step 4, until **Test connection** says Connected. Note how many minutes this took.
+3. **Add your resume.** Sources tab: upload your resume as a Word file or PDF, or paste its text, and choose **Add source and extract facts**.
+4. **Add your LinkedIn profile.** Copy your LinkedIn About and Experience sections, paste them as a second source with the type **LinkedIn profile**, and extract again.
+5. **Run the intake.** Intake tab: choose **Ask me 7 questions**, answer only what is exactly true, skip the rest, then **Save answers as facts**.
+6. **Write three wins.** Wins tab: **Add a win** three times. One story each: the situation, what you did, and what changed. Try **Ask me what is missing** on at least one.
+7. **Review your facts.** Fact base tab: for each fact waiting for you, compare it with the closest line from your own material, then choose **Correct, use it** or **Wrong, reject it**. Look hard at every number.
+8. **Add a real job posting.** Jobs tab: paste the full text of a posting you might apply to (the app cannot open links) and choose **Add and analyze**.
+9. **Write a tailored resume.** Tailor tab: choose **Write tailored resume**. Read every line. If something is off, use **Revise: fix what is flagged here** or edit it.
+10. **Confirm the flagged lines and export.** Under **Lines to confirm before export**, check each line against your own record, choose **I checked every line**, then export **DOCX** or **PDF**. Open the file and check it.
+11. **Look at the Dashboard.** Set the job's status as if you applied, add a next step and a contact in the table, and check that the tiles and charts move. Say whether the counts match what you did.
+12. **Back up.** Setup tab, **Download locked backup**.
+13. **Fill in the form** below.
 
-Optional, if you have time: the **Interview prep** tab for the same job.
+Optional, if you have time:
+
+- **Mock interview** tab: run a three-question interview for the same job and read the scorecard. Say whether the follow-up questions felt real.
+- **Outreach and calls** tab: write a recruiter note for the job, and review a call (a Whisper transcript file, or a few paragraphs of notes from a real call). Check the follow-up email for anything that was not said.
+- **Interview prep** tab for the same job.
+- The **Dark mode** button at the top.
 
 ## Form after each session (about two minutes)
 
