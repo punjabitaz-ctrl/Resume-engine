@@ -22,8 +22,9 @@ Work through it over one or more sessions. You are **finished** when you have ex
 7. **Add a real job posting.** Jobs tab: paste the full text of a posting you might apply to (the app cannot open links) and choose **Add and analyze**.
 8. **Write a tailored resume.** Tailor tab: choose **Write tailored resume**. Read every line. If something is off, use **Revise: fix what is flagged here** or edit it.
 9. **Confirm the flagged lines and export.** Under **Lines to confirm before export**, check each line against your own record, choose **I checked every line**, then export **DOCX** or **PDF**. Open the file and check it.
-10. **Back up.** Setup tab, **Download locked backup**.
-11. **Fill in the form** below.
+10. **Look at the Dashboard.** Set the job's status as if you applied, add a next step and a contact in the table, and check that the tiles and charts move. Say whether the counts match what you did.
+11. **Back up.** Setup tab, **Download locked backup**.
+12. **Fill in the form** below.
 
 Optional, if you have time: the **Interview prep** tab for the same job.
 

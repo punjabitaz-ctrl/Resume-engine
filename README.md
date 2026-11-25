@@ -8,6 +8,7 @@ It is one HTML file plus four bundled libraries. There is no server and nothing 
 
 | Tab | Job |
 | --- | --- |
+| Dashboard | Your search at a glance: applications, jobs that reached an interview, interview rounds and offers as tiles; a pipeline chart (applied, 1st, 2nd and later interviews, offer); status mix; applications per week; rounds by type; and one table of every role with status, next step, posting link and point of contact, editable in place. Every number comes from what you recorded. |
 | Sources | Upload PDF, DOCX or text (resume, LinkedIn, portfolio, project notes). Claude splits it into atomic facts. Long documents are read in parts. |
 | Wins | Your accomplishments told in full using STAR (situation, task, action, result): projects, awards, deliverables, recognition. Scored for strength, tracked per role, checked against a posting. |
 | Intake | Asks 7 questions aimed at gaps in the fact base, optionally targeted at one job. Answers become facts. |
@@ -193,7 +194,7 @@ npm install
 npm test
 ```
 
-The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), fact approval plus the resume standard (`tests/standards.js`), the wins builder (`tests/wins.js`), interview prep (`tests/prep.js`), the privacy and protection checks (`tests/security.js`), the first-run guide, backup reminder and storage request (`tests/firstrun.js`), and a round trip that reads the exported PDF back with the bundled PDF reader (`tests/pdf-roundtrip.mjs`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
+The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), fact approval plus the resume standard (`tests/standards.js`), the wins builder (`tests/wins.js`), interview prep (`tests/prep.js`), the dashboard counts, charts and table edits (`tests/dashboard.js`), the privacy and protection checks (`tests/security.js`), the first-run guide, backup reminder and storage request (`tests/firstrun.js`), and a round trip that reads the exported PDF back with the bundled PDF reader (`tests/pdf-roundtrip.mjs`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
 
 ## Bundled libraries
 
