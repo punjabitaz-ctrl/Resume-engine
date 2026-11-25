@@ -23,6 +23,8 @@ const boot=(opt={})=>new JSDOM(html,{runScripts:'dangerously',url:'http://localh
  const css=fs.readFileSync(path.join(root,'app.css'),'utf8'),L=h=>{const c=[0,2,4].map(i=>parseInt(h.slice(i+1,i+3),16)/255).map(x=>x<=0.03928?x/12.92:((x+0.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2]};
  const g=css.match(/:root\{[\s\S]*?--good:(#[0-9a-f]{6}); --good-soft:(#[0-9a-f]{6})/i),cr=(a,b)=>{a=L(a);b=L(b);return(Math.max(a,b)+.05)/(Math.min(a,b)+.05)};
  ok(g&&cr(g[1],g[2])>=4.5&&cr(g[1],'#ffffff')>=4.5,'green text meets the 4.5 to 1 readability standard on its pale background and on white');
+ const fg=css.match(/:root\{[\s\S]*?--gold:(#[0-9a-f]{6});[\s\S]*?--head:(#[0-9a-f]{6})/i),fk=css.match(/:root\[data-theme="dark"\]\{[\s\S]*?--head:(#[0-9a-f]{6})/i);
+ ok(/header\.top :focus-visible\{outline-color:var\(--gold\)\}/.test(css)&&fg&&fk&&cr(fg[1],fg[2])>=3&&cr(fg[1],fk[1])>=3,'the keyboard focus ring in the navy top bar is gold and meets 3 to 1 in both themes');
  // one tab at a time
  const held=new Set(),locks={request:async(name,o,cb)=>{if(held.has(name))return cb(null);held.add(name);return cb({name})}};
  let a=boot({locks});await wait(300);ok(a.window.__re.S.ready===true,'the first tab loads normally');
