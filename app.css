@@ -8,7 +8,7 @@
   --bg:#faf7f0; --surface:#ffffff; --surface-2:#f7f3ea; --ink:#061325; --muted:#566371; --line:#e4ddcd;
   --navy:#08182c; --navy-2:#143150;
   --accent:#745f36; --gold:#c6a15c; --gold-bright:#ddbd7e; --accent-ink:#061325; --accent-soft:#f3ead8;
-  --good:#2e7d32; --good-soft:#e3f1e2; --warn:#8a5a12; --warn-soft:#fbf0d9; --bad:#b3261e; --bad-soft:#fbe7e4;
+  --good:#256b29; --good-soft:#e3f1e2; --warn:#8a5a12; --warn-soft:#fbf0d9; --bad:#b3261e; --bad-soft:#fbe7e4;
   --blue:#1f5fae; --blue-2:#3b8fd4; --blue-soft:#e6eef8;
   --c1:#1f5fae; --c2:#c6a15c; --c3:#3b8fd4; --c4:#9db4d0; --c5:#b3523f; --c6:#c3ccd7;
   --head:linear-gradient(110deg,#061325 0%,#0d2742 55%,#163d6b 100%);

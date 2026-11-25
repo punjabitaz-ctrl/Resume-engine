@@ -14,6 +14,6 @@ const html=require('./load')();const wait=ms=>new Promise(r=>setTimeout(r,ms));
  w.location.hash='data';await wait(30);R.render();type('#fbText','Extraction stopped.');click('[data-act=copyReport]');await wait(50);click('[data-act=saveReport]');await wait(50);
  console.log('report has version',clip.includes('Version: '+R.APP_VERSION),'error',clip.includes('rate_limited'),'note',clip.includes('Extraction stopped.'),'no resume content',!clip.includes('SECRET'),'| file',saved[0]&&saved[0].filename);
  const link=d.querySelector('[data-issue]');link.addEventListener('click',e=>e.preventDefault());link.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));const href=decodeURIComponent(link.href);
- console.log('issue link',href.startsWith('https://github.com/punjabitaz-ctrl/Resume-engine/issues/new?title=Problem report: Extraction stopped.'),'has report',href.includes('Version: '+R.APP_VERSION),'no resume content',!href.includes('SECRET'));
- if(!href.includes('issues/new?title=')||href.includes('SECRET'))process.exit(1);
+ console.log('email link',href.startsWith('mailto:hello@tazabbas.com?subject=Resume Engine problem: Extraction stopped.'),'has report',href.includes('Version: '+R.APP_VERSION),'no resume content',!href.includes('SECRET'));
+ if(!href.startsWith('mailto:hello@tazabbas.com?subject=')||!href.includes('Version: ')||href.includes('SECRET')||href.length>2600)process.exit(1);
  if(!clip.includes('rate_limited')||clip.includes('SECRET'))process.exit(1);w.close()})().catch(e=>{console.error('FAIL',e);process.exit(1)});

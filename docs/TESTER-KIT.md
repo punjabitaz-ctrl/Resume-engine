@@ -6,15 +6,15 @@ Set up first with **START-HERE.md** in the main folder. This file has the test s
 
 - This is a private test of software that is still being built.
 - Your data lives in your browser on your own computer. Nothing is sent to Taz.
-- Download a password-locked backup after every session (START-HERE, step 6).
-- How to reach Taz privately: **[Taz to fill in]**
+- Download a password-locked backup after every session (START-HERE, step 7).
+- How to reach Taz privately: email **hello@tazabbas.com**. In the app, **Setup > Report a problem > Email this report** fills in the details for you.
 
 ## The test script
 
 Work through it over one or more sessions. You are **finished** when you have exported one tailored resume for a real job posting and downloaded a backup afterwards. Note the time you start, because the form asks how long things took.
 
 1. **Take the guided tour.** It opens by itself the first time. It points at each part of the screen, starting with where your API key goes. Say whether any step confused you. (The **Guided tour** button at the top brings it back.)
-2. **Connect Claude.** Setup tab, as in START-HERE step 4, until **Test connection** says Connected. Note how many minutes this took.
+2. **Connect Claude.** Setup tab, as in START-HERE step 5, until **Test connection** says Connected. Note how many minutes this took.
 3. **Add your resume.** Sources tab: upload your resume as a Word file or PDF, or paste its text, and choose **Add source and extract facts**.
 4. **Add your LinkedIn profile.** Copy your LinkedIn About and Experience sections, paste them as a second source with the type **LinkedIn profile**, and extract again.
 5. **Run the intake.** Intake tab: choose **Ask me 7 questions**, answer only what is exactly true, skip the rest, then **Save answers as facts**.
@@ -25,7 +25,8 @@ Work through it over one or more sessions. You are **finished** when you have ex
 10. **Confirm the flagged lines and export.** Under **Lines to confirm before export**, check each line against your own record, choose **I checked every line**, then export **DOCX** or **PDF**. Open the file and check it.
 11. **Look at the Dashboard.** Set the job's status as if you applied, add a next step and a contact in the table, and check that the tiles and charts move. Say whether the counts match what you did.
 12. **Back up.** Setup tab: **Download locked backup**, or **Back up to Google Drive** or **Back up to OneDrive** if you use one of them in Chrome or Edge. Say which you used.
-13. **Fill in the form** below.
+13. **Try a restore.** Open the app in a second browser profile (or a private window), go to Setup, choose your backup under **Restore from backup** and unlock it with your password. Check that your facts and jobs are there, then close that window. Say whether it worked.
+14. **Fill in the form** below.
 
 Optional, if you have time:
 

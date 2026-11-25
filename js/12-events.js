@@ -12,7 +12,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   reviewCall,callToRound,callNext,copyFollow,dropCall:()=>{S.ui.call=null;render()},
   callOpen:()=>{const j=jobById(D('cJob')),x=j&&callsOf(j).find(c=>c.id===id);if(x){S.ui.draftNumsOk=false;S.ui.call={jobId:j.id,rec:x,extra:x.transcript||''};render()}},
   delCall:()=>{const j=jobById(D('cJob'));if(j){j.calls=callsOf(j).filter(x=>x.id!==id);if(S.ui.call&&S.ui.call.rec.id===id)S.ui.call=null;Store.item('jobs',j);render()}},
-  recStart:()=>Rec.start(),recStop:()=>Rec.stop(),recSave:()=>{if(Rec.blob)save('call-'+new Date().toISOString().slice(0,10)+'.'+((Rec.blob.type.split('/')[1]||'webm').split(';')[0]),Rec.blob)},transcribe,
+  recStart:()=>Rec.start(),recStop:()=>Rec.stop(),recSave:()=>{if(Rec.blob){Rec.saved=true;}if(Rec.blob)save('call-'+new Date().toISOString().slice(0,10)+'.'+((Rec.blob.type.split('/')[1]||'webm').split(';')[0]),Rec.blob)},transcribe,
   theme:()=>{Prefs.set({theme:Prefs.get().theme==='dark'?'light':'dark'});applyTheme()},tour:()=>Tour.start(),
   jobsCSV:()=>save('job-search-'+new Date().toISOString().slice(0,10)+'.csv',new Blob(['\ufeff'+jobsCSV()],{type:'text/csv'})),
   sync:async()=>{$('#syncBtn').disabled=true;await Store.load();$('#syncBtn').disabled=false;render();toast('Data reloaded')},
@@ -42,12 +42,12 @@ document.addEventListener('change',e=>{const t=e.target,c=t.dataset&&t.dataset.c
   else if(c==='callFile'){if(t.files[0])readCallFile(t.files[0])}
   else if(c==='recOk'){S.ui.recOk=t.checked;render()}
   else if(c==='draftNumsOk'){S.ui.draftNumsOk=t.checked}
-  else if(c==='whBase'){const v=t.value.trim();if(v&&!/^https?:\/\//i.test(v)){toast('The address starts with http:// or https://','bad');return}WH.set({base:v.slice(0,300)})}
+  else if(c==='whBase'){const v=t.value.trim();if(v&&!/^https?:\/\//i.test(v)){toast('The address starts with http:// or https://','bad');return}if(/^http:/i.test(v)&&!localHttp(v)){toast('Plain http works only for a Whisper server on this computer. Use https for any other server.','bad');return}WH.set({base:v.slice(0,300)})}
   else if(c==='whModel'){WH.set({model:t.value.trim().slice(0,100)})}
   else if(c==='whKey'){if(t.value==='********')return;WH.key=t.value.trim();try{sessionStorage.setItem('resume-engine-whisper-key',WH.key)}catch(e){}}
   else if(c==='weekGoal'){const n=Math.max(0,Math.min(99,parseInt(t.value,10)||0));S.profile.weekGoal=n;Store.state('profile');render()}
  else if(c==='aiPreset'){const p=PRESETS.find(x=>x[0]===t.value);AI.cfg.preset=t.value;if(p){AI.cfg.api=p[3];if(p[2])AI.cfg.baseUrl=p[2]}AI.models=[];S.ui.aiNote='';AI.save();render()}
- else if(c==='aiCfg'){AI.cfg[k]=t.value.trim();AI.save();if(k==='api')render()}
+ else if(c==='aiCfg'){const v=t.value.trim();if(k==='baseUrl'&&/^http:/i.test(v)&&!localHttp(v)){toast('Plain http works only for a server on this computer (localhost). Use the https address for any other server.','bad');t.value=AI.cfg.baseUrl||'';return}AI.cfg[k]=v;AI.save();if(k==='api')render()}
  else if(c==='aiKey'){if(t.value.trim()){AI.key=t.value.trim();AI.save();render()}}
  else if(c==='aiRemember'){AI.cfg.remember=t.checked;AI.save()}
  else if(c==='lessonOn'){const m=S.memory.find(x=>x.id===id);if(m){m.on=t.checked;Store.state('memory');t.closest('.fact').classList.toggle('off',!t.checked)}}
@@ -69,9 +69,12 @@ document.addEventListener('focusout',e=>{const t=e.target,k=t.dataset&&t.dataset
   else{cur=r[p[0]][p[1]].text;if(text)r[p[0]][p[1]].text=text;else r[p[0]].splice(p[1],1)}
   if(cur!==text){if(!rec.orig)rec.orig=before;rec.editedAt=Date.now();Store.item('resumes',rec);render()}}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.edit){e.preventDefault();e.target.blur()}});
-document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-issue]');if(a)a.href=REPO+'/issues/new?title='+encodeURIComponent('Problem report: '+((D('fbText').trim().split('\n')[0]||'describe the problem').slice(0,80)))+'&body='+encodeURIComponent(reportText().slice(0,5500))},true);
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-issue]');if(a)a.href='mailto:'+REPORT_TO+'?subject='+encodeURIComponent('Resume Engine problem: '+((D('fbText').trim().split('\n')[0]||'describe the problem').slice(0,80)))+'&body='+encodeURIComponent(reportText().slice(0,1800))},true);
 window.addEventListener('hashchange',render);
 window.addEventListener('error',e=>logErr('page',{message:e.message}));
 window.addEventListener('unhandledrejection',e=>logErr('page',e.reason||{}));
 window.__re={Folders,CLOUD,cloudBackup,Tour,TOUR,applyTheme,jobsCSV,dueItems,weekCount,transcriptText,strayNums,WH,Rec,vFileNag,extractAll,Prefs,guideSteps,vBackupNag,askPersist,NAG_MS,metrics,reviewShown,doFix,needsLook,closestLine,srcLines,numLines,numSig,injScan,AUTO_FIX,lockBackup,unlockBackup,scrub,fence,cleanData,THEMES,prepOf,wins,winScore,winText,dashScan,undash,TIRED,matchesSource,corpus,roleDates,HEAL,FIXES,Gate,checkData,doRepair,ruleDiagnosis,applyFix,AI,IN_CLAUDE,parseJSON,Local,APP_VERSION,reportText,errs,S,Store,chunks,snapshot,TPL,tplOf,blocks,diffLines,editPairs,outcomes,signalCount,statGroups,learned,standing,render,scoreText,flagsFor,resumeText,mergeExtraction,buildDocx,buildPdf,hasTerm,unverifiedNums,dateKey,atsChecks};
-AI.load();Store.init().then(()=>{S.ready=true;if(!isEmpty(S))askPersist();S.ui.health=checkData();S.ui.dashSeen=dashScan().n;render();if(S.ui.health.length){S.ui.checked=true;toast('The health check found '+S.ui.health.length+' problem'+(S.ui.health.length>1?'s':'')+' in your saved data. Open Setup to review.','bad')}if(Store.inboxed)toast(Store.inboxed+' item'+(Store.inboxed>1?'s':'')+' loaded by Claude from chat')});
+/* ONE TAB AT A TIME. Two tabs of the app share one database and would overwrite each other's changes, so only the first tab loads the
+   data; a second one says so and loads nothing until the first is closed and it is reloaded. Uses the browser's tab lock where it exists. */
+function oneTab(go){if(IN_CLAUDE||!(navigator.locks&&navigator.locks.request))return go();navigator.locks.request('resume-engine-tab',{ifAvailable:true},lock=>{if(!lock){S.ui.otherTab=true;document.getElementById('view').innerHTML='<div class="card" role="alert"><h2>Resume Engine is already open in another tab</h2><p class="lede">Use that tab. Two tabs at once can overwrite each other\u2019s changes, so this one has loaded nothing. To use this tab instead, close the other one and reload this page.</p></div>';return}go();return new Promise(()=>{})})}
+oneTab(()=>{AI.load();Store.init().then(()=>{S.ready=true;if(!isEmpty(S))askPersist();S.ui.health=checkData();S.ui.dashSeen=dashScan().n;render();if(S.ui.health.length){S.ui.checked=true;toast('The health check found '+S.ui.health.length+' problem'+(S.ui.health.length>1?'s':'')+' in your saved data. Open Setup to review.','bad')}if(Store.inboxed)toast(Store.inboxed+' item'+(Store.inboxed>1?'s':'')+' loaded by Claude from chat')});});

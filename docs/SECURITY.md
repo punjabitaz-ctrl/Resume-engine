@@ -46,3 +46,19 @@ Resume text, work history, wins, job postings, interview notes and an AI provide
 
 - The app has never been opened in a real browser or used with a real provider. The policy, frame refusal and PDF reader are tested in jsdom and Node only.
 - PDF upload is expected to fail when the page is opened straight from disk, since browsers block module imports on `file://`. It fails with a clear message.
+
+## Launch review (v0.21.0, 25 Nov 2026)
+
+Reviewed before the first tester group. Fixed:
+
+- Problem reports no longer open a public GitHub issue. **Email this report** opens the tester's own mail, addressed privately, with the report (no resume content, no key) filled in.
+- A second tab of the app loads nothing and says the app is open in another tab, so two tabs cannot overwrite each other.
+- Plain http connections are allowed only to this computer (localhost, 127.0.0.1), in the page's policy and in the Setup and Whisper address checks. Providers use https.
+- A crafted backup could place markup through a saved mock interview's speaker label. It now accepts only the two known values.
+- Setup shows requests and tokens used this session, as the provider reported them, and says the remembered key is saved unencrypted in this browser.
+- Leaving the page while recording, or with unsaved audio, asks first; recordings show their size and warn when too large for hosted Whisper services.
+- The hosted copy sends security headers from `_headers` (the same content policy plus no framing, no referrer, microphone for this site only).
+- The full test suite runs on GitHub on every push.
+- Success text in the light theme now meets the 4.5 to 1 contrast standard.
+
+Hosting the app at its own https address also removes a localhost risk: every program served at localhost:8000 shares one storage area, so another local tool on that port could read the saved key and data. The local copy remains available; testers who use it should not run other tools on port 8000.

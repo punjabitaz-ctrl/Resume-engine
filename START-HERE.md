@@ -1,16 +1,22 @@
-# Start here: Resume Engine on your own computer
+# Start here: Resume Engine
 
-Thanks for testing. This takes about 20 minutes the first time. You need:
+Thanks for testing. This takes about 15 minutes the first time. You need:
 
-- A Windows or Mac computer with Chrome, Edge, Firefox or Safari
-- Python 3 (free, step 1)
-- Your own Anthropic API key with a little prepaid credit (step 3). This is what lets the app use Claude.
+- A Windows or Mac computer. Chrome or Edge works best: Firefox and Safari work too, but cannot back up straight to Google Drive or OneDrive.
+- Your own Anthropic API key with a little prepaid credit (step 4). This is what lets the app use Claude.
 
-Everything you add stays on your computer. The only thing that leaves it is the text you ask the app to work on, which goes straight to Anthropic under your own key.
+Everything you add stays in your browser on your computer. The only thing that leaves it is the text you ask the app to work on, which goes straight to Anthropic under your own key. Nothing is sent to Taz or stored on a website.
 
-Read **TESTER-KIT.md** (in the `docs` folder) after this. It has the test script and the short form to fill in after each session.
+Read **TESTER-KIT.md** (in the `docs` folder, or sent with this guide) after this. It has the test script and the short form to fill in after each session.
 
-## 1. Install Python (once)
+## 1. Choose how to run it
+
+- **Web address (easiest).** Open the address Taz sends you, in Chrome or Edge, and go to step 4. Nothing to install. The website only delivers the app; your data is kept in your own browser, not on the site.
+- **On your own computer.** Download the zip and follow steps 2 and 3. Use this if you would rather run everything locally.
+
+Pick one and stay with it. The web address and the local copy keep separate data, even in the same browser. To move from one to the other, back up in one (step 7) and restore in the other.
+
+## 2. Install Python (once, local copy only)
 
 **Windows**
 
@@ -22,7 +28,7 @@ Read **TESTER-KIT.md** (in the `docs` folder) after this. It has the test script
 1. Open Terminal and type `python3 --version`. If it prints a version number, you already have it.
 2. If not, download the latest Python 3 for macOS from python.org and run the installer.
 
-## 2. Start the app
+## 3. Start the app (local copy only)
 
 1. Unzip the folder somewhere you will keep it, such as Documents. Do not run it from inside the zip.
 2. Start it:
@@ -31,13 +37,13 @@ Read **TESTER-KIT.md** (in the `docs` folder) after this. It has the test script
    - **Either, if the start file will not run:** open Terminal (Mac) or Command Prompt (Windows), type `cd ` followed by a space, drag the app folder into the window, press Enter, then type `python3 serve.py` (Mac) or `py serve.py` (Windows) and press Enter.
 3. A small window opens and your browser opens the app at `http://localhost:8000`. Keep the small window open while you use the app. Close it when you are done.
 
-Three rules that keep your data safe:
+Three rules that keep your data safe (the second and third apply to the web address too):
 
 - **Always start the app with the start file.** Your data is stored under the address `localhost:8000`. Double-clicking `index.html` opens a different, empty copy, and PDF upload does not work there.
 - **Use the same browser every time.** Data in Chrome is not visible in Safari, and the other way round.
 - **Use one tab.** Two tabs of the app at once can overwrite each other's changes.
 
-## 3. Get your Claude API key
+## 4. Get your Claude API key
 
 The app talks to Claude through Anthropic's API. A Claude.ai subscription (Pro) does not include API use, so you set up a separate pay-as-you-go account. You only pay for what you use.
 
@@ -47,7 +53,7 @@ The app talks to Claude through Anthropic's API. A Claude.ai subscription (Pro) 
 
 Treat the key like a password. Do not email it or paste it into a problem report.
 
-## 4. Connect the app (Setup tab)
+## 5. Connect the app (Setup tab)
 
 The first time you open the app, a guided tour starts by itself and points at each of these fields. You can follow it instead of this list, and bring it back any time with **Guided tour** at the top of the page.
 
@@ -58,11 +64,11 @@ The first time you open the app, a guided tour starts by itself and points at ea
 5. Choose **Test connection**. You should see "Connected" and a short reply.
 6. **Remember the key on this device:** on means you do not paste it again next time. Off means it is forgotten when the tab closes. Either is fine on your own computer.
 
-## 5. Use it
+## 6. Use it
 
 The **Sources** tab opens with a **Start here** list of seven steps. Each step ticks itself when it is done. The test script in TESTER-KIT.md walks through the same steps in more detail.
 
-## 6. Back up at the end of every session
+## 7. Back up at the end of every session
 
 Browsers can clear stored data on their own, for example when the disk is nearly full. A backup is your safety net.
 
