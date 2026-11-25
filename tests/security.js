@@ -48,7 +48,7 @@ const reply=o=>({ok:true,headers:{get:()=>'application/json'},json:async()=>({ch
  ({w,d}=mk(async()=>reply({}),{claude:true}));await wait(300);ok(w.__re.IN_CLAUDE&&!d.querySelector('meta[http-equiv="Content-Security-Policy"]'),'inside Claude the page adds no policy of its own');w.close();
  // 5. static checks on the shipped files
  const page=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8'),css=fs.readFileSync(path.join(__dirname,'../app.css'),'utf8'),js=require('./load').code();
- ok(!/https?:\/\//.test(page)&&!/url\(|@import|https?:\/\//.test(css),'the page and its styles load nothing from any other site');
+ const cssUrls=css.match(/url\([^)]*\)/g)||[];ok(!/https?:\/\//.test(page)&&!/@import|https?:\/\/|\/\//.test(css.replace(/\/\*[\s\S]*?\*\//g,''))&&cssUrls.every(u=>/^url\("lib\/fonts\/[a-z-]+\.woff2"\)$/.test(u)&&fs.existsSync(path.join(__dirname,'..',u.slice(5,-2)))),'the page and its styles load nothing from any other site; the only files the styles load are the bundled fonts: '+cssUrls.length);
  ok(page.includes('name="referrer" content="no-referrer"')&&!/<script>|onclick=|onerror=/.test(page),'no inline script in the page, and outgoing links send no referrer');
  ok(!/\beval\(|new Function|document\.write|insertAdjacentHTML|outerHTML\s*=/.test(js),'no eval, document.write or other risky sinks in the code');
  ok(js.includes('isEvalSupported:false')&&js.includes("window.top!==window.self"),'the PDF reader runs with script evaluation off, and the page refuses to run inside another site’s frame');

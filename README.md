@@ -204,6 +204,8 @@ The scripts drive the real page in jsdom against simulated providers. They cover
 | `lib/jspdf.umd.min.js` | jsPDF 4.2.1 | MIT |
 | `lib/mammoth.browser.min.js` | mammoth 1.13.0 | BSD-2-Clause |
 | `lib/pdf.min.js`, `lib/pdf.worker.min.js` | PDF.js 6.5.438 (legacy build, ES module) | Apache-2.0 |
+| `lib/fonts/cormorant-garamond*.woff2` | Cormorant Garamond (headings), Latin subset | SIL Open Font License 1.1 (`lib/fonts/OFL-cormorant-garamond.txt`) |
+| `lib/fonts/hanken-grotesk.woff2` | Hanken Grotesk (text), Latin subset | SIL Open Font License 1.1 (`lib/fonts/OFL-hanken-grotesk.txt`) |
 
 ## Where this is going
 
