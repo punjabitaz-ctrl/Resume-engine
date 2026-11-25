@@ -27,7 +27,8 @@ Read **TESTER-KIT.md** (in the `docs` folder) after this. It has the test script
 1. Unzip the folder somewhere you will keep it, such as Documents. Do not run it from inside the zip.
 2. Start it:
    - **Windows:** double-click `start-windows.bat`. If Windows shows "Windows protected your PC", choose **More info**, then **Run anyway**.
-   - **Mac:** right-click `start-mac.command`, choose **Open**, then **Open** again. You only have to do this the first time.
+   - **Mac:** right-click `start-mac.command`, choose **Open**, then **Open** again. You only have to do this the first time. If your Mac only offers **Done** or **Move to Bin**, choose **Done**, open **System Settings**, then **Privacy & Security**, scroll down and choose **Open Anyway**.
+   - **Either, if the start file will not run:** open Terminal (Mac) or Command Prompt (Windows), type `cd ` followed by a space, drag the app folder into the window, press Enter, then type `python3 serve.py` (Mac) or `py serve.py` (Windows) and press Enter.
 3. A small window opens and your browser opens the app at `http://localhost:8000`. Keep the small window open while you use the app. Close it when you are done.
 
 Three rules that keep your data safe:
