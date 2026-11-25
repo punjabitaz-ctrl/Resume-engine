@@ -27,7 +27,7 @@ const Store={db:null,uid:null,owner:false,mode:'local',pending:{},running:{},inb
      return}
    }catch(e){this.mode='local'}}
   const o=await Local.get();if(o){for(const k of DATA_KEYS)if(o[k])S[k]=o[k];cleanData(S)}},
- write(path,get){if(this.mode!=='cloud')path='local';this.pending[path]=get;if(this.running[path])return;this.running[path]=true;(async()=>{while(this.pending[path]){const g=this.pending[path];delete this.pending[path];try{await this.put(path,g())}catch(e){toast(e&&e.code==='quota_exceeded'?'Storage is full. Delete old sources or versions.':'Could not save. Your change is still on screen; try again.','bad')}}this.running[path]=false})()},
+ write(path,get){Prefs.changed();if(this.mode!=='cloud')path='local';this.pending[path]=get;if(this.running[path])return;this.running[path]=true;(async()=>{while(this.pending[path]){const g=this.pending[path];delete this.pending[path];try{await this.put(path,g())}catch(e){toast(e&&e.code==='quota_exceeded'?'Storage is full. Delete old sources or versions.':'Could not save. Your change is still on screen; try again.','bad')}}this.running[path]=false})()},
  async put(path,data){if(this.mode==='cloud'){const ref=this.db.doc(path);if(data===null)await ref.delete();else await ref.set(data)}else if(!(await Local.set(clone(snapshot()))))toast('This browser blocked saving. Download a backup from the Setup tab.','bad')},
  state(k){this.write(this.P(k),()=>k==='profile'?clone(S.profile):{items:clone(S[k])})},
  item(coll,it){this.write(this.P('lib')+'/'+coll+'/'+it.id,()=>{const o=clone(it);delete o.id;return o})},
@@ -35,4 +35,7 @@ const Store={db:null,uid:null,owner:false,mode:'local',pending:{},running:{},inb
  saveAll(){for(const k of ['profile','roles','facts','memory'])this.state(k);for(const c of ['sources','jobs','resumes'])for(const it of S[c])if(it&&it.id)this.item(c,it)},
  replaceAll(o){for(const c of ['sources','jobs','resumes'])for(const it of (Array.isArray(S[c])?S[c]:[]))if(it&&it.id)this.remove(c,it.id);S.profile=o.profile||{};for(const k of ['roles','facts','memory','sources','jobs','resumes'])S[k]=Array.isArray(o[k])?o[k]:[];cleanData(S);this.saveAll()}
 };
+/* Ask the browser to keep this site's data when space runs low. The browser decides on its own (some grant it only to bookmarked or
+   installed sites); the answer is shown in Setup so the user knows how much the backup matters. */
+async function askPersist(){if(Store.mode==='cloud'){S.ui.persist='account';return}try{const st=navigator.storage;if(!st||!st.persist){S.ui.persist='unsupported';return}S.ui.persist=(await st.persisted())||(await st.persist())?'kept':'not yet'}catch(e){S.ui.persist='unsupported'}if(S.ready&&route()==='data')render()}
 function snapshot(){const o={};for(const k of DATA_KEYS)o[k]=S[k];return o}

@@ -2,7 +2,7 @@
 
 Updated at the end of each build cycle so work can resume without rereading the whole history.
 
-## State: v0.16.0 (12 Nov 2026)
+## State: v0.17.0 (25 Nov 2026)
 
 Everything below is on `main` and published to the inside-Claude copy.
 
@@ -24,6 +24,7 @@ Everything below is on `main` and published to the inside-Claude copy.
 - v0.14: backups are always password locked (owner: "password protected backups are a must"). No plain export.
 - v0.15: code split into `js/` (twelve ordered classic scripts, no build step). Fact review list with the closest source line and marked numbers and words; confirm or reject per fact. Every fact with a number waits for the user; every version's numbers must be confirmed before export. Technical retries run automatically (frozen `AUTO_FIX` list, once each per failed step, logged). Injection defences strengthened (sealed markers, hidden characters stripped, flagged sources untrusted, foreign-link check).
 - v0.16: only metrics are held for confirmation, not dates or years (`metrics()` in js/02-logic.js; a bare four-digit figure with no date wording still counts as a metric). The review list groups facts by role with a gated "I read these: confirm all" tap that covers only the facts shown.
+- v0.17 (tester build, owner: "build what a tester will need"): a seven-step Start here guide on Sources that ticks itself from the user's own data and can be hidden (Setup brings it back); a backup reminder strip when work has no backup, and again when changes are over 20 minutes newer than the last backup (`Prefs` in js/01-state.js holds only dates and flags, no content); the browser is asked to keep stored data after the first change, and Setup shows the last backup date and the answer; a warning when the page is opened from file://; a source cut at 9 parts now records and shows how much was left out. `serve.py` with `start-windows.bat` and `start-mac.command` serves the folder at localhost:8000 with correct script types. START-HERE.md is the tester setup guide (Python, start file, Anthropic key with prepaid credit and auto-reload off, Setup, backups); docs/TESTER-KIT.md has the test script, form, terms and privacy note. tests/firstrun.js covers the new parts.
 - Spoken mock interviews are approved as essential but not built. Decision made: the user chooses between Chrome's free built-in speech and a voice-capable model of their own choosing. Build is on hold with all other new features.
 
 ## Not yet proven

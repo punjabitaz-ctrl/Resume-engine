@@ -105,8 +105,11 @@ Two signals are captured as you work, at no cost:
 
 Serve the repository root as a static site. Any of these works:
 
+- On your own computer: double-click `start-windows.bat` or `start-mac.command`. Both run `serve.py` (Python 3), which serves the folder at `http://localhost:8000` and opens it. [START-HERE.md](START-HERE.md) is the step-by-step guide for testers, including getting an Anthropic API key.
 - GitHub Pages: repository Settings, Pages, deploy from the `main` branch root
-- Locally: `npx serve .` or `python3 -m http.server`, then open the address it prints
+- Any static server, such as `npx serve .`
+
+Data is stored per address, so always open the app at the same address. Opening `index.html` straight from the file system blocks PDF upload and stores data apart from the served copy; the app warns when that happens.
 
 Open the **Setup** tab and choose an AI engine:
 
@@ -176,7 +179,9 @@ js/               the app code in twelve ordered files: state, logic, storage, A
                   actions, export, repair, views, wins, interview prep, events
 app.css           all styles (system fonts, nothing loaded from other sites)
 lib/              bundled third-party libraries (see below)
-docs/             the resume standard, interview prep notes and the security review
+docs/             the resume standard, interview prep notes, the security review and the tester kit
+START-HERE.md     setup guide for testers running it on their own computer
+serve.py          local server on localhost:8000, started by start-windows.bat or start-mac.command
 HANDOFF.md        current state and next steps, updated at the end of each build cycle
 tests/            jsdom scripts with a simulated Claude runtime, database and AI providers
 ```
@@ -188,7 +193,7 @@ npm install
 npm test
 ```
 
-The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), fact approval plus the resume standard (`tests/standards.js`), the wins builder (`tests/wins.js`), interview prep (`tests/prep.js`), the privacy and protection checks (`tests/security.js`), and a round trip that reads the exported PDF back with the bundled PDF reader (`tests/pdf-roundtrip.mjs`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
+The scripts drive the real page in jsdom against simulated providers. They cover intake and extraction, storage modes and migration, versions, templates and exports, the learning loop, problem reports, bring-your-own-key and local-model modes (`tests/byo.js`), the repair system (`tests/heal.js`), fact approval plus the resume standard (`tests/standards.js`), the wins builder (`tests/wins.js`), interview prep (`tests/prep.js`), the privacy and protection checks (`tests/security.js`), the first-run guide, backup reminder and storage request (`tests/firstrun.js`), and a round trip that reads the exported PDF back with the bundled PDF reader (`tests/pdf-roundtrip.mjs`). Nothing in them calls a real provider, so a live connection is only proven by the Setup tab's "Test connection" button.
 
 ## Bundled libraries
 
