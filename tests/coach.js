@@ -1,4 +1,4 @@
-// Dark mode, the guided tour, the dashboard additions, outreach drafts, call reviews and mock interviews.
+// The theme switch, the guided tour, the dashboard additions, outreach drafts, call reviews and mock interviews.
 const {JSDOM}=require('jsdom');
 const html=require('./load')();const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
@@ -33,10 +33,13 @@ const reply=o=>({ok:true,headers:{get:()=>'application/json'},json:async()=>({ch
  click('#tourBtn');await wait(20);ok(!!d.querySelector('#tour'),'Guided tour in the header brings it back');d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape'}));ok(!d.querySelector('#tour'),'Escape closes the tour');
  ok(R.TOUR.every(s=>!/https?:\/\//.test(s.body)),'the tour links nowhere outside the app');
  ok(R.TOUR.every(s=>!/[\u2013\u2014]/.test(s.title+s.body)),'the tour has no long dashes');
- // 2. dark mode
- ok(d.documentElement.dataset.theme==='light'&&d.querySelector('#themeBtn').textContent==='Dark mode','the app starts light');
- click('#themeBtn');ok(d.documentElement.dataset.theme==='dark'&&R.Prefs.get().theme==='dark'&&d.querySelector('#themeBtn').getAttribute('aria-pressed')==='true','the toggle switches to dark and remembers it');
- click('#themeBtn');ok(d.documentElement.dataset.theme==='light','and back to light');
+ // 2. theme switch: Auto, Light, Dark
+ const pressed=()=>[...d.querySelectorAll('#themeSw [data-id]')].filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.dataset.id).join();
+ ok(d.documentElement.dataset.theme==='light'&&pressed()==='auto'&&R.themeMode()==='auto','the app starts on Auto, light when the device does not ask for dark');
+ ok(d.querySelector('#themeSw').getAttribute('role')==='group'&&[...d.querySelectorAll('#themeSw button')].every(b=>b.getAttribute('aria-label')),'the switch is a labelled group and every button keeps a name on phones');
+ click('#themeSw [data-id=dark]');ok(d.documentElement.dataset.theme==='dark'&&R.Prefs.get().theme==='dark'&&pressed()==='dark','Dark switches to dark and remembers it');
+ click('#themeSw [data-id=light]');ok(d.documentElement.dataset.theme==='light'&&pressed()==='light','Light switches back');
+ click('#themeSw [data-id=auto]');ok(d.documentElement.dataset.theme==='light'&&R.Prefs.get().theme==='auto'&&pressed()==='auto','Auto follows the device again');
  // data for the rest
  R.AI.cfg.baseUrl='http://localhost:1/v1';R.AI.cfg.model='m';S.profile.name='Taz';
  S.facts.push({id:'f1',kind:'win',title:'Partner launch',text:'Ran partner enablement for 40 resellers',ok:true,star:{}},{id:'f2',kind:'responsibility',text:'Grew partner pipeline 75% in one year',ok:true});R.Store.state('facts');

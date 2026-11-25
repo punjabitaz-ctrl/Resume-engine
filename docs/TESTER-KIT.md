@@ -33,7 +33,7 @@ Optional, if you have time:
 - **Mock interview** tab: run a three-question interview for the same job and read the scorecard. Say whether the follow-up questions felt real.
 - **Outreach and calls** tab: write a recruiter note for the job, and review a call (a Whisper transcript file, or a few paragraphs of notes from a real call). Check the follow-up email for anything that was not said.
 - **Interview prep** tab for the same job.
-- The **Dark mode** button at the top.
+- The **Auto, Light and Dark** switch at the top.
 
 ## Form after each session (about two minutes)
 

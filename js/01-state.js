@@ -27,8 +27,12 @@ const Prefs={k:'resume-engine-prefs',
  clear(){try{localStorage.removeItem(this.k)}catch(e){}},
  changed(){if(!this.get().changedAt){this.set({changedAt:Date.now()});askPersist()}},
  backedUp(){this.set({backupAt:Date.now(),changedAt:0})}};
-/* Light or dark, the user's choice, kept with the other settings. Light unless they switch. */
-function applyTheme(){const dark=Prefs.get().theme==='dark';document.documentElement.dataset.theme=dark?'dark':'light';const b=document.getElementById('themeBtn');if(b){b.textContent=dark?'Light mode':'Dark mode';b.setAttribute('aria-pressed',String(dark))}}
+/* Auto, Light or Dark (shared design language, docs/DESIGN.md), the user's choice, kept with the other settings. Auto follows the
+   device and is the default; the page always carries the resolved light or dark on <html>, which app.css answers. */
+const darkMQ=(()=>{try{return window.matchMedia('(prefers-color-scheme: dark)')}catch(e){return null}})();
+function themeMode(){const t=Prefs.get().theme;return t==='light'||t==='dark'?t:'auto'}
+function applyTheme(){const m=themeMode(),dark=m==='dark'||(m==='auto'&&!!(darkMQ&&darkMQ.matches));document.documentElement.dataset.theme=dark?'dark':'light';document.querySelectorAll('#themeSw [data-id]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===m)))}
+if(darkMQ&&darkMQ.addEventListener)darkMQ.addEventListener('change',()=>{if(themeMode()==='auto')applyTheme()});
 applyTheme();
 const errs=[];function logErr(where,e){errs.push({at:new Date().toISOString(),where:String(where),code:String((e&&e.code)||''),msg:scrub((e&&e.message)||'').slice(0,200)});if(errs.length>8)errs.shift()}
 const $=(s,r=document)=>r.querySelector(s);
