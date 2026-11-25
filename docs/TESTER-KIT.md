@@ -21,7 +21,7 @@ Work through it over one or more sessions. You are **finished** when you have ex
 6. **Review your facts.** Fact base tab: for each fact waiting for you, compare it with the closest line from your own material, then choose **Correct, use it** or **Wrong, reject it**. Look hard at every number.
 7. **Add a real job posting.** Jobs tab: paste the full text of a posting you might apply to (the app cannot open links) and choose **Add and analyze**.
 8. **Write a tailored resume.** Tailor tab: choose **Write tailored resume**. Read every line. If something is off, use **Revise: fix what is flagged here** or edit it.
-9. **Confirm the numbers and export.** Check each number against your own record, choose **I checked every number**, then export **DOCX** or **PDF**. Open the file and check it.
+9. **Confirm the flagged lines and export.** Under **Lines to confirm before export**, check each line against your own record, choose **I checked every line**, then export **DOCX** or **PDF**. Open the file and check it.
 10. **Back up.** Setup tab, **Download locked backup**.
 11. **Fill in the form** below.
 

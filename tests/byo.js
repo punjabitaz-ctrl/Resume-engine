@@ -20,7 +20,7 @@ const ok=(cond,msg)=>{console.log((cond?'PASS ':'FAIL ')+msg);if(!cond)process.e
  click(d,'[data-act=loadModels]');await wait(100);ok(R.AI.models.join()==='model-a,model-b','models are loaded from the provider, not baked in');
  set(w,'#aiModel','model-a');ok(R.AI.ready(),'engine ready after address, model and key');
  ok(!d.documentElement.innerHTML.includes('test-key-abcd1234')&&d.querySelector('#aiKey').placeholder.includes('1234'),'key is not echoed into the page, only its last 4 characters');
- w.location.hash='sources';await wait(30);R.render();set(w,'#srcText','Resume text long enough to be accepted as a source for testing.','input');click(d,'[data-act=addSource]');await wait(200);
+ w.location.hash='sources';await wait(30);R.render();set(w,'#srcText','Sample Person. Manager at Acme, Jan 2020 to Present. Resume text long enough to be accepted as a source for testing.','input');click(d,'[data-act=addSource]');await wait(200);
  const call=calls.find(c=>c.u.endsWith('/messages'));
  ok(call&&call.u==='https://api.anthropic.com/v1/messages','calls the Anthropic messages address');
  ok(call.o.headers['x-api-key']==='test-key-abcd1234'&&call.o.headers['anthropic-dangerous-direct-browser-access']==='true'&&call.o.headers['anthropic-version']==='2023-06-01','sends Anthropic headers with the user key');
@@ -35,7 +35,7 @@ const ok=(cond,msg)=>{console.log((cond?'PASS ':'FAIL ')+msg);if(!cond)process.e
  // 2. OpenAI-compatible local server, not streamed, reasoning tags and code fence, no key
  ({w,d,calls}=mk(async()=>({ok:true,headers:{get:()=>'application/json'},json:async()=>({choices:[{message:{content:'<think>working</think>Here you go:\n```json\n'+JSON.stringify(EXTRACT)+'\n```'},finish_reason:'stop'}]})})));
  await wait(300);R=w.__re;w.location.hash='data';await wait(30);R.render();set(w,'#aiPreset','ollama');set(w,'#aiModel','local-model');
- w.location.hash='sources';await wait(30);R.render();set(w,'#srcText','Resume text long enough to be accepted as a source for testing.','input');w.document.querySelector('[data-act=addSource]').dispatchEvent(new w.MouseEvent('click',{bubbles:true}));await wait(200);
+ w.location.hash='sources';await wait(30);R.render();set(w,'#srcText','Sample Person. Manager at Acme, Jan 2020 to Present. Resume text long enough to be accepted as a source for testing.','input');w.document.querySelector('[data-act=addSource]').dispatchEvent(new w.MouseEvent('click',{bubbles:true}));await wait(200);
  ok(calls[0].u==='http://localhost:11434/v1/chat/completions'&&!('authorization' in calls[0].o.headers),'local model: OpenAI-compatible address, no key sent');
  ok(R.S.facts.length===1,'local model answer with reasoning tags and a code fence is parsed');w.close();
  // 3. errors

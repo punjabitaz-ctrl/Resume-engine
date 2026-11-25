@@ -27,7 +27,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
  // long source → chunks
  const long=Array.from({length:900},(_,i)=>'Line '+i+' of a long LinkedIn export with details about work.').join('\n');
  console.log('chunks',R.chunks(long).length,R.chunks(long).map(c=>c.length).join(','),R.chunks(long).join('').length===long.length+1);
- type('#srcText',long);click('[data-act=addSource]');await wait(300);
+ type('#srcText','Sample Person, s@e.co, 555. Channel Manager and Channel & Partnerships Manager, Acme XR, Jan 2026 to Present.\n'+long);click('[data-act=addSource]');await wait(300);
  console.log('unmatched facts wait for approval',S.facts.filter(f=>f.ok===false&&f.match===false).length>0);S.facts.forEach(f=>{f.ok=true});
  console.log('extract calls',calls.filter(c=>c.startsWith('You are building')).length,'facts',S.facts.length,'roles',S.roles.length,'part note',calls[1].includes('This is part 2 of'));
  // merge duplicate roles, move a fact

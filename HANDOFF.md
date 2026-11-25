@@ -2,7 +2,7 @@
 
 Updated at the end of each build cycle so work can resume without rereading the whole history.
 
-## State: v0.17.0 (25 Nov 2026)
+## State: v0.18.0 (25 Nov 2026)
 
 Everything below is on `main` and published to the inside-Claude copy.
 
@@ -25,6 +25,7 @@ Everything below is on `main` and published to the inside-Claude copy.
 - v0.15: code split into `js/` (twelve ordered classic scripts, no build step). Fact review list with the closest source line and marked numbers and words; confirm or reject per fact. Every fact with a number waits for the user; every version's numbers must be confirmed before export. Technical retries run automatically (frozen `AUTO_FIX` list, once each per failed step, logged). Injection defences strengthened (sealed markers, hidden characters stripped, flagged sources untrusted, foreign-link check).
 - v0.16: only metrics are held for confirmation, not dates or years (`metrics()` in js/02-logic.js; a bare four-digit figure with no date wording still counts as a metric). The review list groups facts by role with a gated "I read these: confirm all" tap that covers only the facts shown.
 - v0.17 (tester build, owner: "build what a tester will need"): a seven-step Start here guide on Sources that ticks itself from the user's own data and can be hidden (Setup brings it back); a backup reminder strip when work has no backup, and again when changes are over 20 minutes newer than the last backup (`Prefs` in js/01-state.js holds only dates and flags, no content); the browser is asked to keep stored data after the first change, and Setup shows the last backup date and the answer; a warning when the page is opened from file://; a source cut at 9 parts now records and shows how much was left out. `serve.py` with `start-windows.bat` and `start-mac.command` serves the folder at localhost:8000 with correct script types. START-HERE.md is the tester setup guide (Python, start file, Anthropic key with prepaid credit and auto-reload off, Setup, backups); docs/TESTER-KIT.md has the test script, form, terms and privacy note. tests/firstrun.js covers the new parts.
+- v0.18 (owner: fix the fact-check gaps before the first tester): closes findings 2 to 7 of the pre-test review. Skills, education, certifications and the headline are checked and join the lines to confirm before export (panel now "Lines to confirm"); the writer's jobs must tie to a saved role (by id, else by the role of the facts they cite) or are left out with a banner; only approved facts count as citations; intake questions are not evidence (`srcEvidence`); numbers match with their unit (`numUnits`) and spelled-out numbers are metrics; extracted name, contact details, companies, titles and dates are kept only when found in the source (`inSource`, dates by month and year); deleting a win never re-approves a rejected fact, and replaced facts leave the review list. tests/factcheck.js covers them. Review findings 8 to 22 beyond what v0.17 did are not done.
 - Spoken mock interviews are approved as essential but not built. Decision made: the user chooses between Chrome's free built-in speech and a voice-capable model of their own choosing. Build is on hold with all other new features.
 
 ## Not yet proven

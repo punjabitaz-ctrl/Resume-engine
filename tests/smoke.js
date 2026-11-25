@@ -29,7 +29,7 @@ const canned={
  const R=w.__re,S=R.S;const click=sel=>{const el=d.querySelector(sel);if(!el)throw new Error('no '+sel);el.dispatchEvent(new w.MouseEvent('click',{bubbles:true}))};
  const type=(sel,v)=>{const el=d.querySelector(sel);el.value=v;el.dispatchEvent(new w.Event('input',{bubbles:true}))};
  console.log('mode',R.Store.mode,'tabs',d.querySelectorAll('#tabs a').length);
- type('#srcText','Sample Person. '+canned.extract.facts.map(f=>f.text).join('. ')+'.');click('[data-act=addSource]');await wait(200);
+ type('#srcText','Sample Person. s@example.com, 555-0100, Princeton, NJ, linkedin.com/in/sample.\nChannel Manager, Acme XR, Remote, Jan 2026 to Present.\nPartner Lead, OldCo, Mar 2019 to Dec 2025.\n'+canned.extract.facts.map(f=>f.text).join('. ')+'.');click('[data-act=addSource]');await wait(200);
  console.log('facts',S.facts.length,'roles',S.roles.length,'profile',S.profile.name);
  for(const t of ['facts','interview','memory','jobs']){w.location.hash=t;await wait(30);R.render();console.log(t,d.querySelector('#view').textContent.length)}
  type('#jobText',JD);click('[data-act=addJob]');await wait(200);
