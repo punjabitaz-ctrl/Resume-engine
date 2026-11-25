@@ -24,7 +24,7 @@ Work through it over one or more sessions. You are **finished** when you have ex
 9. **Write a tailored resume.** Tailor tab: choose **Write tailored resume**. Read every line. If something is off, use **Revise: fix what is flagged here** or edit it.
 10. **Confirm the flagged lines and export.** Under **Lines to confirm before export**, check each line against your own record, choose **I checked every line**, then export **DOCX** or **PDF**. Open the file and check it.
 11. **Look at the Dashboard.** Set the job's status as if you applied, add a next step and a contact in the table, and check that the tiles and charts move. Say whether the counts match what you did.
-12. **Back up.** Setup tab, **Download locked backup**.
+12. **Back up.** Setup tab: **Download locked backup**, or **Back up to Google Drive** or **Back up to OneDrive** if you use one of them in Chrome or Edge. Say which you used.
 13. **Fill in the form** below.
 
 Optional, if you have time:

@@ -67,8 +67,11 @@ The **Sources** tab opens with a **Start here** list of seven steps. Each step t
 Browsers can clear stored data on their own, for example when the disk is nearly full. A backup is your safety net.
 
 1. Open **Setup**, under **Your data**.
-2. Type a backup password twice and choose **Download locked backup**.
-3. Keep the file and the password. A forgotten password cannot be recovered.
+2. Type a backup password twice and choose where it goes:
+   - **Download locked backup** saves the file to this computer.
+   - **Back up to Google Drive** or **Back up to OneDrive** (Chrome or Edge) saves it into the folder that the Google Drive for desktop app or OneDrive keeps in sync, and that app uploads it. The first time, choose that folder; after that it is one tap. The file is locked before it is written, so Google and Microsoft cannot read it.
+3. Keep the password. A forgotten password cannot be recovered, and no backup opens without it.
+4. To restore on another computer, choose the backup file under **Restore from backup**, from your Downloads or from your Google Drive or OneDrive folder.
 
 The app shows a reminder until you have a backup, and again when changes are more than 20 minutes newer than your last one. To restore, use **Restore from backup** on the same tab.
 

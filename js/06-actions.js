@@ -44,7 +44,33 @@ async function lockBackup(obj,pass){const salt=crypto.getRandomValues(new Uint8A
 async function unlockBackup(f,pass){const iter=+f.iter;if(!(iter>=100000&&iter<=5000000))throw 0;const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(f.iv)},await bkKey(pass,unb64(f.salt),iter),unb64(f.data));return JSON.parse(new TextDecoder().decode(pt))}
 const isBackup=o=>!!o&&Array.isArray(o.facts)&&Array.isArray(o.roles);
 function bkFields(){return '<div class="grid2"><label>Backup password<input type="password" id="bkPass" autocomplete="new-password" placeholder="At least '+BK_MIN+' characters"></label><label>Type it again<input type="password" id="bkPass2" autocomplete="new-password"></label></div><p class="small">Every backup is locked with this password. It is not saved anywhere and cannot be recovered, so a forgotten password means a lost backup. Keep it in a password manager.</p>'}
-async function exportBackup(){const p=fv('bkPass'),p2=fv('bkPass2');if(!(window.crypto&&crypto.subtle)){toast('This browser cannot lock backups here. Open the app over https or in a current browser.','bad');return}if(p.length<BK_MIN){toast('Choose a backup password of at least '+BK_MIN+' characters first.','bad');return}if(p!==p2){toast('The two passwords do not match.','bad');return}
+async function exportBackup(){const p=bkPassOk();if(!p)return;
  const f=await lockBackup(Object.assign({app:'resume-engine',v:2,exportedAt:new Date().toISOString()},snapshot()),p);['bkPass','bkPass2'].forEach(i=>{const e=document.getElementById(i);if(e)e.value=''});if(await save('resume-engine-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(f))){Prefs.backedUp();render()}}
 async function readImport(file){try{const o=JSON.parse(await file.text());S.ui.imp=null;S.ui.impLocked=null;if(o&&o.locked===true&&typeof o.data==='string'&&typeof o.salt==='string'&&typeof o.iv==='string')S.ui.impLocked=o;else if(isBackup(o)){S.ui.imp=o;S.ui.impPlain=true}else throw 0;render()}catch(e){toast('That file is not a Resume Engine backup.','bad')}}
 async function unlockImport(){const f=S.ui.impLocked,p=fv('bkOpen');if(!f||!p)return;try{const o=await unlockBackup(f,p);if(!isBackup(o))throw 0;S.ui.imp=o;S.ui.impPlain=false;S.ui.impLocked=null;render()}catch(e){toast('That password does not open this backup.','bad')}}
+/* BACKUP TO GOOGLE DRIVE OR ONEDRIVE. The locked file is written into the folder that the Google Drive or OneDrive app keeps in sync on this
+   computer, and that app uploads it. No sign-in and no request to Google or Microsoft from this page; the file is locked before it is written,
+   so neither company can read it. Needs a browser with folder access (Chrome or Edge on a computer). The folder handle is kept in this
+   browser's database so later backups are one tap; the browser asks again for permission when it needs to. */
+const CLOUD={gdrive:['Google Drive','the Google Drive for desktop app','My Drive'],onedrive:['OneDrive','OneDrive (built into Windows, or the OneDrive app on a Mac)','OneDrive']};
+const Folders={mem:{},
+ ok(){return !IN_CLAUDE&&typeof window.showDirectoryPicker==='function'},
+ async get(k){if(this.mem[k])return this.mem[k];try{const h=await Local.get('bk-'+k);if(h&&h.kind==='directory'){this.mem[k]=h;return h}}catch(e){}return null},
+ async keep(k,h){this.mem[k]=h;try{await Local.set(h,'bk-'+k)}catch(e){}},
+ async forget(k){delete this.mem[k];try{await Local.set(null,'bk-'+k)}catch(e){}}};
+function bkPassOk(){const p=fv('bkPass'),p2=fv('bkPass2');if(!(window.crypto&&crypto.subtle)){toast('This browser cannot lock backups here. Open the app over https or in a current browser.','bad');return null}if(p.length<BK_MIN){toast('Choose a backup password of at least '+BK_MIN+' characters first.','bad');return null}if(p!==p2){toast('The two passwords do not match.','bad');return null}return p}
+async function cloudBackup(k){const c=CLOUD[k];if(!c)return;if(!Folders.ok()){toast('This browser cannot save into a folder. Use Chrome or Edge, or download the backup and move it into your '+c[0]+' folder.','bad');return}
+ const p=bkPassOk();if(!p)return;let h=await Folders.get(k);
+ if(h){let perm='denied';try{perm=await h.queryPermission({mode:'readwrite'});if(perm!=='granted')perm=await h.requestPermission({mode:'readwrite'})}catch(e){perm='denied'}if(perm!=='granted')h=null}
+ if(!h){toast('Choose your '+c[0]+' folder, the one '+c[1]+' keeps in sync.');try{h=await window.showDirectoryPicker({id:'re-'+k,mode:'readwrite',startIn:'documents'})}catch(e){toast('No folder chosen, so nothing was saved.','bad');return}await Folders.keep(k,h)}
+ const f=await lockBackup(Object.assign({app:'resume-engine',v:2,exportedAt:new Date().toISOString()},snapshot()),p);['bkPass','bkPass2'].forEach(i=>{const e=document.getElementById(i);if(e)e.value=''});
+ const name='resume-engine-backup-'+new Date().toISOString().slice(0,10)+'.json';
+ try{const fh=await h.getFileHandle(name,{create:true}),w=await fh.createWritable();await w.write(JSON.stringify(f));await w.close()}catch(e){await Folders.forget(k);toast('Could not write to that folder. Choose your '+c[0]+' folder again.','bad');return}
+ Prefs.backedUp();Prefs.set({['cloud_'+k]:Date.now()});render();
+ const named=new RegExp(k==='gdrive'?'drive':'onedrive','i').test(h.name||'');
+ toast(named?'Locked backup saved in '+h.name+'. '+c[0]+' uploads it when it next syncs.':'Locked backup saved in the folder "'+h.name+'". Check that this folder is inside your '+c[0]+' folder, or the copy stays on this computer only.',named?'':'bad')}
+async function cloudForget(k){if(!CLOUD[k])return;await Folders.forget(k);Prefs.set({['cloud_'+k]:0});render();toast('Folder forgotten. The next '+CLOUD[k][0]+' backup asks for it again.')}
+function vCloud(){if(IN_CLAUDE)return '';const p=Prefs.get(),day=t=>new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+ if(!Folders.ok())return '<p class="small">To keep a copy in Google Drive or OneDrive, open the app in Chrome or Edge on a computer, which can save straight into those folders. Or download the backup and move the file into your Google Drive or OneDrive folder.</p>';
+ return '<p class="small">Google Drive and OneDrive backups are saved into the folder their app keeps in sync on this computer (Google Drive for desktop, or OneDrive), and that app uploads them. The first time, choose that folder; after that it is one tap. The file is locked with your password before it leaves this page, so Google and Microsoft cannot read it. To restore, choose the file from that folder below.</p>'
+  +Object.keys(CLOUD).filter(k=>p['cloud_'+k]).map(k=>'<div class="row small"><span>Last saved to '+CLOUD[k][0]+': '+day(p['cloud_'+k])+'</span><button class="quiet" data-act="cloudForget" data-id="'+k+'">Change folder</button></div>').join('')}

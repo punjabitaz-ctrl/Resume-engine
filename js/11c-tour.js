@@ -18,7 +18,7 @@ const TOUR=[
  {tab:'practice',sel:'#view .card',title:'Practice with a mock interview',body:'<p>An AI interviewer asks questions for the job and round you pick, follows up on your answers, and scores you at the end.</p>'},
  {tab:'calls',sel:'#view .card',title:'Reach out, and learn from every call',body:'<p>Write cover letters and outreach notes from your approved facts. After a call, bring in a transcript from Whisper or any notes app, or record a call. You get feedback on the conversation, follow-up points and an email draft to review.</p>'},
  {tab:'dash',sel:'#view .stack',title:'Track everything',body:'<p>The Dashboard shows your applications, interviews and offers, what is due next, and which channels earn interviews. Set follow-up dates in the table.</p>'},
- {tab:'data',sel:'[data-act=exportBackup]',title:'Back up after each session',body:'<p>Your data lives in this browser, which can clear it. Download a locked backup at the end of every session.</p>'},
+ {tab:'data',sel:'[data-act=exportBackup]',title:'Back up after each session',body:'<p>Your data lives in this browser, which can clear it. Save a locked backup at the end of every session: to this computer, or to Google Drive or OneDrive in Chrome and Edge.</p>'},
  {title:'You are ready',body:'<p>Start with Setup if your key is not connected yet, then add your resume.</p><p class="small">Guided tour at the top brings this back.</p>'}];
 const Tour={i:0,el:null,list:[],
  auto(){const p=Prefs.get();if(p.tourDone||S.facts.length||S.jobs.length||S.sources.length)return;this.start()},
