@@ -4,7 +4,7 @@ const S={profile:{},roles:[],facts:[],memory:[],sources:[],jobs:[],resumes:[],ui
 const TABS=[['dash','Dashboard'],['sources','Sources'],['wins','Wins'],['interview','Intake'],['facts','Fact base'],['jobs','Jobs'],['tailor','Tailor'],['prep','Interview prep'],['practice','Mock interview'],['calls','Outreach and calls'],['memory','Memory'],['data','Setup']];
 const KINDS=['win','achievement','responsibility','skill','project','education','certification','award','summary','other'];
 const STATUSES=['Saved','Applied','Interview','Offer','Rejected','No response'];
-const APP_VERSION='0.21.0';
+const APP_VERSION='0.21.1';
 const IN_CLAUDE=!!(window.claude&&window.claude.use);
 const REPO='https://github.com/punjabitaz-ctrl/Resume-engine',REPORT_TO='hello@tazabbas.com';
 /* Plain http is allowed only to this computer (a local model or Whisper server); everything else must be https. */
